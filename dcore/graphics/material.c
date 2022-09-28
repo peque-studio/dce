@@ -1,7 +1,22 @@
+#include "dcore/debug.h"
 #include <dcore/graphics.h>
 #include <dcore/graphics/internal.h>
 #include <stdlib.h>
 #include <vulkan/vulkan_core.h>
+
+void CreateLayout_(
+	DCgState *state,
+	DCgMaterial *material,
+	DCgMaterialOptions *options
+) {
+	VkPipelineLayoutCreateInfo createInfo = {0};
+	createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	createInfo.pushConstantRangeCount = (uint32_t)DCgiGetPushConstantRanges(state, options->pushConstantsIndex, NULL);
+	DCgiGetPushConstantRanges(state, 0, &createInfo.pPushConstantRanges);
+	createInfo.setLayoutCount = (uint32_t)DCgiGetSetLayouts(state, options->descriptorSetsIndex, NULL);
+	DCgiGetSetLayouts(state, 0, &createInfo.pSetLayouts);
+	vkCreatePipelineLayout(state->device, &createInfo, NULL, &material->layout);
+}
 
 DCgMaterial *dcgNewMaterial(
     DCgState *state,
@@ -11,13 +26,14 @@ DCgMaterial *dcgNewMaterial(
     DCgMaterialCache *cache
 ) {
     DCgMaterial *material = malloc(sizeof(DCgMaterial));
+	CreateLayout_(state, material, options);
 
     VkPipelineVertexInputStateCreateInfo vertexInputInfo = {0};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	// vertexInputInfo.vertexBindingDescriptionCount = (uint32_t)options->bindingDescriptions.count;
-	// vertexInputInfo.pVertexBindingDescriptions = info.vertexInputInfo.bindingDescriptions.values;
-	// vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)info.vertexInputInfo.attributeDescriptions.count;
-	// vertexInputInfo.pVertexAttributeDescriptions = info.vertexInputInfo.attributeDescriptions.values;
+	vertexInputInfo.vertexBindingDescriptionCount = (uint32_t)DCgiGetVertexBindings(state, options->vertexInputIndex, NULL);
+	DCgiGetVertexBindings(state, options->vertexInputIndex, &vertexInputInfo.pVertexBindingDescriptions);
+	vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)DCgiGetVertexAttributes(state, options->vertexInputIndex, NULL);
+	DCgiGetVertexAttributes(state, options->vertexInputIndex, &vertexInputInfo.pVertexAttributeDescriptions);
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {0};
 	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -101,11 +117,21 @@ DCgMaterial *dcgNewMaterial(
 	depthStencilState.maxDepthBounds = options->maxDepthBound;
 	depthStencilState.stencilTestEnable = options->enableStencilTest;
 
+	VkPipelineShaderStageCreateInfo *shaderStages
+		= calloc(moduleCount, sizeof(VkPipelineShaderStageCreateInfo));
+	
+	for(size_t i = 0; i < moduleCount; ++i) {
+		shaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		shaderStages[i].module = modules[i].module;
+		shaderStages[i].stage = (VkShaderStageFlagBits)modules[i].stage;
+		shaderStages[i].pName = modules[i].name;
+	}
+
 	VkGraphicsPipelineCreateInfo createInfo = {0};
 
 	createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	createInfo.stageCount = (uint32_t)moduleCount;
-	createInfo.pStages = NULL; // TODO: convert `modules` to pStages
+	createInfo.pStages = shaderStages;
 	createInfo.pVertexInputState = &vertexInputInfo;
 	createInfo.pInputAssemblyState = &inputAssembly;
 	createInfo.pViewportState = &viewportState;
@@ -114,20 +140,35 @@ DCgMaterial *dcgNewMaterial(
 	createInfo.pDepthStencilState = &depthStencilState;
 	createInfo.pColorBlendState = &colorBlending;
 	createInfo.pDynamicState = NULL;
-	createInfo.layout = material->layout; // TODO: create the actual layout
-	createInfo.renderPass = NULL; // TODO: get the render pass (probably from DCgState)
-	createInfo.subpass = 0;
+	createInfo.layout = material->layout;
+	createInfo.renderPass = DCgiGetRenderPass(state, 0);
+	createInfo.subpass = 0; // ?TODO: subpass
 	createInfo.basePipelineHandle = VK_NULL_HANDLE;
 	createInfo.basePipelineIndex = -1;
 
     // TODO: error handling.
     vkCreateGraphicsPipelines(state->device, (VkPipelineCache)cache, 1, &createInfo, NULL, &material->pipeline);
 
+	free(shaderStages);
     return material;
 }
 
 void dcgFreeMaterial(DCgState *state, DCgMaterial *material) {
-    if(material == NULL) DCD_MSGF(DEBUG, "Tried to free NULL material.");
+    DEBUGIF(material == NULL) {
+		DCD_MSGF(ERROR, "Tried to free NULL material.");
+		return;
+	}
+
+	DEBUGIF(material->pipeline == VK_NULL_HANDLE) {
+		DCD_MSGF(ERROR, "Tried to destroy NULL pipeline object.");
+		return;
+	} else vkDestroyPipeline(state->device, material->pipeline, NULL);
+
+	DEBUGIF(material->layout == VK_NULL_HANDLE) {
+		DCD_MSGF(ERROR, "Tried to destroy NULL pipeline layout object.");
+		return;
+	} else vkDestroyPipelineLayout(state->device, material->layout, NULL);
+
     free(material);
 }
 

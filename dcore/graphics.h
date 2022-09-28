@@ -22,15 +22,17 @@ void dcgCmdBindMat(DCgState *s, DCgCmdBuffer *cmds, DCgMaterial *mat);
 void dcgCmdDraw(DCgState *s, DCgCmdBuffer *cmds, size_t indices, size_t instances);
 void dcgSubmit(DCgState *s, DCgCmdBuffer *cmds, int queue);
 
-typedef enum DCgShaderModuleType {
-    DCG_SHADER_MODULE_VERTEX,
-    DCG_SHADER_MODULE_FRAGMENT,
-} DCgShaderModuleType;
+typedef enum DCgPipelineStage {
+    DCG_SHADER_STAGE_VERTEX = 0x01,
+    DCG_SHADER_STAGE_GEOMETRY = 0x08,
+    DCG_SHADER_STAGE_FRAGMENT = 0x10,
+    DCG_SHADER_STAGE_COMPUTE = 0x20,
+} DCgShaderStage;
 
 typedef struct DCgShaderModule {
-    DCgShaderModuleType type;
-    uint32_t *code;
-    const char *entry;
+    DCgShaderStage stage;
+    void *module;
+    const char *name;
 } DCgShaderModule;
 
 typedef enum DCgCullMode {
@@ -71,6 +73,9 @@ typedef struct DCgMaterialOptions {
     float minDepthBound, maxDepthBound;
     bool enableStencilTest;
     DCmExtent2 viewportExtent;
+    int pushConstantsIndex,
+        descriptorSetsIndex,
+        vertexInputIndex;
 } DCgMaterialOptions;
 
 typedef struct DCgMaterialCache DCgMaterialCache;
@@ -84,7 +89,15 @@ DCgMaterial *dcgNewMaterial(
 );
 
 DCgMaterialCache *dcgGetMaterialCache(DCgState *state, DCgMaterial *material);
-
 void dcgFreeMaterial(DCgState *state, DCgMaterial *material);
+
+DCgShaderModule dcgNewShaderModule(
+    DCgState *state,
+    DCgShaderStage stage,
+    size_t size,
+    uint32_t *code,
+    const char *name
+);
+
 
 #endif

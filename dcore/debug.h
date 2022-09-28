@@ -15,5 +15,6 @@ typedef enum DCdMsgType {
 void dcdMsgF(DCdMsgType type, const char *file, const char *func, int line, const char *fmt, ...);
 
 #define DCD_MSGF(T, FMT, ...) dcdMsgF(DCD_MSG_TYPE_##T, __FILE__, __func__, __LINE__, FMT __VA_OPT__(,) __VA_ARGS__)
+#define DEBUGIF(COND) if(COND)
 
 #endif
