@@ -2,7 +2,7 @@
 #define DCORE_MATH_VECTOR_H
 #include <dcore/common.h>
 
-#define DCM_MK_VECTOR2_DEF__(N,T) typedef struct N { T x, y; } N
+#define DCM_MK_VECTOR2_DEF__(N,T) typedef T N[2]
 
 DCM_MK_VECTOR2_DEF__(DCmVector2u8 ,  uint8_t);
 DCM_MK_VECTOR2_DEF__(DCmVector2u16, uint16_t);
