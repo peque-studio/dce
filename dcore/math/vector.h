@@ -52,6 +52,9 @@ typedef DCmVector4u32 DCmExtent4;
 #define DCM__VV_F(S, _, N, K, BODY) static inline void DCmVector##K##S##N( \
                                                       DCmVector##K##S dst, \
                                                       const DCmVector##K##S src) { BODY }
+#define DCM__SVV_F(S, T, N, K, BODY) static inline T DCmVector##K##S##N( \
+                                                      const DCmVector##K##S a, \
+                                                      const DCmVector##K##S b) { BODY }
 #define DCM__VS_F(S, T, N, K, BODY) static inline void DCmVector##K##S##N( \
                                                       DCmVector##K##S vector, \
                                                       T scalar) { BODY }
@@ -64,6 +67,12 @@ DCM__V_FOR(DCM__VS_F,, Adds, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, +=););
 DCM__V_FOR(DCM__VS_F,, Subs, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, -=););
 DCM__V_FOR(DCM__VS_F,, Muls, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, *=););
 DCM__V_FOR(DCM__VS_F,, Divs, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, /=););
+DCM__V_FOR(DCM__SVV_F,, Dot, 2, return a[0] * b[0] + a[1] * b[1];);
+DCM__V_FOR(DCM__VV_F,, Cross, 3,
+    dst[0] = dst[1] * src[2] - dst[2] * src[1];
+    dst[1] = dst[2] * src[0] - dst[0] * src[2];
+    dst[2] = dst[0] * src[1] - dst[1] * src[0];
+);
 
 /* void test() {
     DCmVector2i16 a = { 12, -48 };
