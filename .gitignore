@@ -1,0 +1,7 @@
+*.o
+*.d
+dist/*
+bin/*
+out/*
+
+*_scrot.png
