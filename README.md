@@ -28,3 +28,17 @@ Gameplay code will be written in a scripting language.
 
 All player data is saved to a compressed binary file.
 
+<h2 align=center>Contributing</h2>
+
+Write sensible code :)
+
+<h3 align=center>Commit Message Format</h3>
+
+The commit message should be in this format: `[MODULE:KIND] MESSAGE`
+- `MODULE` can be DCm (math), DCg (graphics), DCd (debug), ... or git (git-related things), doc for docs, test for tests
+- `KIND` can be either `fix` for general fixes, `add` for adding new stuff, `imp` for improvements (rename for example)
+- `MESSAGE` is a short-ish message describing the changes. The explanation should be in the commit messages "body" if needed.
+
+<h3 align=center>Issues/PRs</h3>
+
+I can't always answer to issues and PR review takes time and I don't have much of it :( I for certain will answer in 0-1 days.
