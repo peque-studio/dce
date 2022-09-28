@@ -2,21 +2,75 @@
 #define DCORE_MATH_VECTOR_H
 #include <dcore/common.h>
 
-#define DCM_MK_VECTOR2_DEF__(N,T) typedef T N[2]
+#define DCM__V2_DEF(N, T, _) typedef T DCmVector2##N[2]
+#define DCM__V3_DEF(N, T, _) typedef T DCmVector3##N[3]
+#define DCM__V4_DEF(N, T, _) typedef T DCmVector4##N[4]
 
-DCM_MK_VECTOR2_DEF__(DCmVector2u8 ,  uint8_t);
-DCM_MK_VECTOR2_DEF__(DCmVector2u16, uint16_t);
-DCM_MK_VECTOR2_DEF__(DCmVector2u32, uint32_t);
-DCM_MK_VECTOR2_DEF__(DCmVector2u64, uint64_t);
-DCM_MK_VECTOR2_DEF__(DCmVector2i8 ,  int8_t);
-DCM_MK_VECTOR2_DEF__(DCmVector2i16, int16_t);
-DCM_MK_VECTOR2_DEF__(DCmVector2i32, int32_t);
-DCM_MK_VECTOR2_DEF__(DCmVector2i64, int64_t);
-DCM_MK_VECTOR2_DEF__(DCmVector2f, float);
-DCM_MK_VECTOR2_DEF__(DCmVector2d, double);
+#define DCM__V_FOR(O, SEP, ...) \
+    O(u8, uint8_t, __VA_ARGS__) SEP \
+    O(u16, uint16_t, __VA_ARGS__) SEP \
+    O(u32, uint32_t, __VA_ARGS__) SEP \
+    O(u64, uint64_t, __VA_ARGS__) SEP \
+    O(i8, int8_t, __VA_ARGS__) SEP \
+    O(i16, int16_t, __VA_ARGS__) SEP \
+    O(i32, int32_t, __VA_ARGS__) SEP \
+    O(i64, int64_t, __VA_ARGS__) SEP \
+    O(i, int, __VA_ARGS__) SEP \
+    O(u, unsigned int, __VA_ARGS__) SEP \
+    O(s, size_t, __VA_ARGS__) SEP \
+    O(f, float, __VA_ARGS__) SEP \
+    O(d, double, __VA_ARGS__)
+
+DCM__V_FOR(DCM__V2_DEF, ;);
+DCM__V_FOR(DCM__V3_DEF, ;);
+DCM__V_FOR(DCM__V4_DEF, ;);
 
 typedef DCmVector2f DCmVector2;
 typedef DCmVector2i32 DCmOffset2;
 typedef DCmVector2u32 DCmExtent2;
+typedef DCmVector3f DCmVector3;
+typedef DCmVector3i32 DCmOffset3;
+typedef DCmVector3u32 DCmExtent3;
+typedef DCmVector4f DCmVector4;
+typedef DCmVector4i32 DCmOffset4;
+typedef DCmVector4u32 DCmExtent4;
+
+#define DCM__V2_OP_FOR(O, SEP, ...) O(0, __VA_ARGS__) SEP \
+                                              O(1, __VA_ARGS__)
+
+#define DCM__V3_OP_FOR(O, SEP, ...) O(0, __VA_ARGS__) SEP \
+                                              O(1, __VA_ARGS__) SEP \
+                                              O(2, __VA_ARGS__)
+
+#define DCM__V4_OP_FOR(O, SEP, ...) O(0, __VA_ARGS__) SEP \
+                                              O(1, __VA_ARGS__) SEP \
+                                              O(2, __VA_ARGS__) SEP \
+                                              O(3, __VA_ARGS__)
+
+#define DCM__VV_OP(I, OP) dst[I] OP src[I]
+#define DCM__VS_OP(I, OP) vector[I] OP scalar
+#define DCM__VV_F(S, _, N, K, BODY) static inline void DCmVector##K##S##N( \
+                                                      DCmVector##K##S dst, \
+                                                      const DCmVector##K##S src) { BODY }
+#define DCM__VS_F(S, T, N, K, BODY) static inline void DCmVector##K##S##N( \
+                                                      DCmVector##K##S vector, \
+                                                      T scalar) { BODY }
+
+DCM__V_FOR(DCM__VV_F,, Addv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, +=););
+DCM__V_FOR(DCM__VV_F,, Subv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, -=););
+DCM__V_FOR(DCM__VV_F,, Mulv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, *=););
+DCM__V_FOR(DCM__VV_F,, Divv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, /=););
+DCM__V_FOR(DCM__VS_F,, Adds, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, +=););
+DCM__V_FOR(DCM__VS_F,, Subs, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, -=););
+DCM__V_FOR(DCM__VS_F,, Muls, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, *=););
+DCM__V_FOR(DCM__VS_F,, Divs, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, /=););
+
+/* void test() {
+    DCmVector2i16 a = { 12, -48 };
+    DCmVector2i16 b = { -93, 11 };
+    DCmVector2i16Divs(a, 12);
+    DCmVector2i16Addv(b, a);
+    // -> a = { -92, 7 };
+} */
 
 #endif
