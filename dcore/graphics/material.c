@@ -41,14 +41,14 @@ DCgMaterial *dcgNewMaterial(
 	inputAssembly.primitiveRestartEnable = VK_FALSE;
 
 	VkRect2D scissor = {0};
-	scissor.offset = (VkOffset2D){ options->scissorOffset.x, options->scissorOffset.y };
-	scissor.extent = (VkExtent2D){ options->scissorExtent.x, options->scissorExtent.y };
+	scissor.offset = (VkOffset2D){ options->scissorOffset[0], options->scissorOffset[1] };
+	scissor.extent = (VkExtent2D){ options->scissorExtent[0], options->scissorExtent[1] };
 
 	VkViewport viewport = {0};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.width = (float)options->viewportExtent.x;
-	viewport.height = (float)options->viewportExtent.y;
+	viewport.width = (float)options->viewportExtent[0];
+	viewport.height = (float)options->viewportExtent[1];
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
