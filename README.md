@@ -42,3 +42,23 @@ The commit message should be in this format: `[MODULE:KIND] MESSAGE`
 <h3 align=center>Issues/PRs</h3>
 
 I can't always answer to issues and PR review takes time and I don't have much of it :( I for certain will answer in 0-1 days.
+
+<h3 align=center>Naming</h3>
+
+**Each symbol should have a prefix**:
+- `DCg`/`dcg` for graphics
+- `DCm`/`dcm` for maths
+- `DCd`/`dcd` for debug
+- Optional `i` suffix for internal names (for example `DCgi`)
+
+**Functions**:
+- Procedural (not `ImageGetAspectRatio`, but `GetImageAspectRatio`)
+- Lower-case Prefix (<code><u>dcg</u>GetMaterialCache</code>)
+- For creating objects: <code>preNew<u>ObjectType</u></code>
+- For destroying objects: <code>preFree<u>ObjectType</u></code>
+- For creating objects that are handled by their parent: <code>preGetNew<u>ObjectType</u></code>
+- For returning lists: <code>size_t preGet<u>List</u>(..., <u>T</u> *list)</code>
+
+**Types**:
+- Do ***not*** use `_t`!
+- Upper-case Prefix (<code><u>DCg</u>MaterialOptions</code>)
