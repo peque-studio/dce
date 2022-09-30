@@ -17,12 +17,12 @@ typedef DCgBuffer DCgIndexBuffer;
 void dcgInit(DCgState *s);
 void dcgDeinit(DCgState *s);
 
-typedef enum DCgCmdPoolType {
-    DCG_CMD_POOL_TYPE_GRAPHICS,
-    DCG_CMD_POOL_TYPE_COMPUTE,
-} DCgCmdPoolType;
+typedef enum DCgQueueFamilyType {
+    DCG_QUEUE_FAMILY_TYPE_GRAPHICS,
+    DCG_QUEUE_FAMILY_TYPE_COMPUTE,
+} DCgQueueFamilyType;
 
-DCgCmdPool *dcgNewCmdPool(DCgState *s, DCgCmdPoolType type);
+DCgCmdPool *dcgNewCmdPool(DCgState *s, DCgQueueFamilyType type);
 void dcgFreeCmdPool(DCgState *s, DCgCmdPool *pool);
 
 DCgCmdBuffer *dcgGetNewCmdBuffer(DCgState *s, DCgCmdPool *pool);

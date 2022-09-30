@@ -11,6 +11,8 @@ struct DCgState {
 
     size_t renderPassCount;
     VkRenderPass *renderPasses;
+
+    VkAllocationCallbacks *allocator;
 };
 
 struct DCgMaterial {
@@ -18,7 +20,7 @@ struct DCgMaterial {
     VkPipelineLayout layout;
 };
 
-void DCgiAddRenderPass(
+void dcgiAddRenderPass(
     DCgState *state,
     size_t attachmentCount,
     VkAttachmentDescription *attachments,
@@ -26,10 +28,11 @@ void DCgiAddRenderPass(
     VkSubpassDescription *subpasses
 );
 
-VkRenderPass DCgiGetRenderPass(DCgState *state, int index);
-size_t DCgiGetPushConstantRanges(DCgState *state, int index, const VkPushConstantRange **ranges);
-size_t DCgiGetSetLayouts(DCgState *state, int index, const VkDescriptorSetLayout **layouts);
-size_t DCgiGetVertexBindings(DCgState *state, int index, const VkVertexInputBindingDescription **descriptions);
-size_t DCgiGetVertexAttributes(DCgState *state, int index, const VkVertexInputAttributeDescription **descriptions);
+VkRenderPass dcgiGetRenderPass(DCgState *state, int index);
+size_t dcgiGetPushConstantRanges(DCgState *state, int index, const VkPushConstantRange **ranges);
+size_t dcgiGetSetLayouts(DCgState *state, int index, const VkDescriptorSetLayout **layouts);
+size_t dcgiGetVertexBindings(DCgState *state, int index, const VkVertexInputBindingDescription **descriptions);
+size_t dcgiGetVertexAttributes(DCgState *state, int index, const VkVertexInputAttributeDescription **descriptions);
+uint32_t dcgiGetQueueFamily(DCgState *state, DCgQueueFamilyType type);
 
 #endif

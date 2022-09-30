@@ -11,10 +11,10 @@ void CreateLayout_(
 ) {
 	VkPipelineLayoutCreateInfo createInfo = {0};
 	createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	createInfo.pushConstantRangeCount = (uint32_t)DCgiGetPushConstantRanges(state, options->pushConstantsIndex, NULL);
-	DCgiGetPushConstantRanges(state, 0, &createInfo.pPushConstantRanges);
-	createInfo.setLayoutCount = (uint32_t)DCgiGetSetLayouts(state, options->descriptorSetsIndex, NULL);
-	DCgiGetSetLayouts(state, 0, &createInfo.pSetLayouts);
+	createInfo.pushConstantRangeCount = (uint32_t)dcgiGetPushConstantRanges(state, options->pushConstantsIndex, NULL);
+	dcgiGetPushConstantRanges(state, 0, &createInfo.pPushConstantRanges);
+	createInfo.setLayoutCount = (uint32_t)dcgiGetSetLayouts(state, options->descriptorSetsIndex, NULL);
+	dcgiGetSetLayouts(state, 0, &createInfo.pSetLayouts);
 	vkCreatePipelineLayout(state->device, &createInfo, NULL, &material->layout);
 }
 
@@ -30,10 +30,10 @@ DCgMaterial *dcgNewMaterial(
 
     VkPipelineVertexInputStateCreateInfo vertexInputInfo = {0};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = (uint32_t)DCgiGetVertexBindings(state, options->vertexInputIndex, NULL);
-	DCgiGetVertexBindings(state, options->vertexInputIndex, &vertexInputInfo.pVertexBindingDescriptions);
-	vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)DCgiGetVertexAttributes(state, options->vertexInputIndex, NULL);
-	DCgiGetVertexAttributes(state, options->vertexInputIndex, &vertexInputInfo.pVertexAttributeDescriptions);
+	vertexInputInfo.vertexBindingDescriptionCount = (uint32_t)dcgiGetVertexBindings(state, options->vertexInputIndex, NULL);
+	dcgiGetVertexBindings(state, options->vertexInputIndex, &vertexInputInfo.pVertexBindingDescriptions);
+	vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)dcgiGetVertexAttributes(state, options->vertexInputIndex, NULL);
+	dcgiGetVertexAttributes(state, options->vertexInputIndex, &vertexInputInfo.pVertexAttributeDescriptions);
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {0};
 	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -141,13 +141,19 @@ DCgMaterial *dcgNewMaterial(
 	createInfo.pColorBlendState = &colorBlending;
 	createInfo.pDynamicState = NULL;
 	createInfo.layout = material->layout;
-	createInfo.renderPass = DCgiGetRenderPass(state, 0);
+	createInfo.renderPass = dcgiGetRenderPass(state, 0);
 	createInfo.subpass = 0; // ?TODO: subpass
 	createInfo.basePipelineHandle = VK_NULL_HANDLE;
 	createInfo.basePipelineIndex = -1;
 
     // TODO: error handling.
-    vkCreateGraphicsPipelines(state->device, (VkPipelineCache)cache, 1, &createInfo, NULL, &material->pipeline);
+    vkCreateGraphicsPipelines(
+		state->device,
+		(VkPipelineCache)cache,
+		1, &createInfo,
+		state->allocator,
+		&material->pipeline
+	);
 
 	free(shaderStages);
     return material;
@@ -162,12 +168,14 @@ void dcgFreeMaterial(DCgState *state, DCgMaterial *material) {
 	DEBUGIF(material->pipeline == VK_NULL_HANDLE) {
 		DCD_MSGF(ERROR, "Tried to destroy NULL pipeline object.");
 		return;
-	} else vkDestroyPipeline(state->device, material->pipeline, NULL);
+	} else
+		vkDestroyPipeline(state->device, material->pipeline, state->allocator);
 
 	DEBUGIF(material->layout == VK_NULL_HANDLE) {
 		DCD_MSGF(ERROR, "Tried to destroy NULL pipeline layout object.");
 		return;
-	} else vkDestroyPipelineLayout(state->device, material->layout, NULL);
+	} else
+		vkDestroyPipelineLayout(state->device, material->layout, state->allocator);
 
     free(material);
 }
