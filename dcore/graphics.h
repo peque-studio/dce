@@ -9,13 +9,24 @@ typedef struct DCgAlloc DCgAlloc;
 typedef struct DCgBuffer DCgBuffer;
 typedef struct DCgMaterial DCgMaterial;
 typedef struct DCgCmdBuffer DCgCmdBuffer;
+typedef void *DCgCmdPool;
 
 typedef DCgBuffer DCgVertexBuffer;
 typedef DCgBuffer DCgIndexBuffer;
 
 void dcgInit(DCgState *s);
 void dcgDeinit(DCgState *s);
-void dcgCmdBegin(DCgState *s);
+
+typedef enum DCgCmdPoolType {
+    DCG_CMD_POOL_TYPE_GRAPHICS,
+    DCG_CMD_POOL_TYPE_COMPUTE,
+} DCgCmdPoolType;
+
+DCgCmdPool *dcgNewCmdPool(DCgState *s, DCgCmdPoolType type);
+void dcgFreeCmdPool(DCgState *s, DCgCmdPool *pool);
+
+DCgCmdBuffer *dcgGetNewCmdBuffer(DCgState *s, DCgCmdPool *pool);
+void dcgCmdBegin(DCgState *s, DCgCmdBuffer *cmds);
 void dcgCmdBindVertexBuf(DCgState *s, DCgCmdBuffer *cmds, DCgVertexBuffer *vbuf);
 void dcgCmdBindIndexBuf(DCgState *s, DCgCmdBuffer *cmds, DCgIndexBuffer *ibuf);
 void dcgCmdBindMat(DCgState *s, DCgCmdBuffer *cmds, DCgMaterial *mat);
