@@ -9,4 +9,6 @@
 #define DCE_VERSION_MINOR 0
 #define DCE_VERSION_PATCH 1
 
+#define ARRAYSIZE(A) (sizeof(A)/sizeof(0[A]))
+
 #endif

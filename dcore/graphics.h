@@ -14,8 +14,15 @@ typedef void *DCgCmdPool;
 typedef DCgBuffer DCgVertexBuffer;
 typedef DCgBuffer DCgIndexBuffer;
 
-void dcgInit(DCgState *s);
+DCgState *dcgNewState();
+void dcgInit(DCgState *s, uint32_t appVersion, const char *appName);
 void dcgDeinit(DCgState *s);
+void dcgFreeState(DCgState *state);
+
+bool dcgShouldClose(DCgState *state);
+void dcgClose(DCgState *state);
+void dcgGetMousePosition(DCgState *state, DCmVector2i mousePosition);
+void dcgUpdate(DCgState *state);
 
 typedef enum DCgQueueFamilyType {
     DCG_QUEUE_FAMILY_TYPE_GRAPHICS,

@@ -2,7 +2,7 @@
 #define DCORE_GRAPHICS_INTERNAL_H
 #include <dcore/graphics.h>
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
+#include <GLFW/glfw3.h>
 
 struct DCgState {
     VkInstance instance;
@@ -13,6 +13,8 @@ struct DCgState {
     VkRenderPass *renderPasses;
 
     VkAllocationCallbacks *allocator;
+
+    GLFWwindow *window;
 };
 
 struct DCgMaterial {
@@ -34,5 +36,22 @@ size_t dcgiGetSetLayouts(DCgState *state, int index, const VkDescriptorSetLayout
 size_t dcgiGetVertexBindings(DCgState *state, int index, const VkVertexInputBindingDescription **descriptions);
 size_t dcgiGetVertexAttributes(DCgState *state, int index, const VkVertexInputAttributeDescription **descriptions);
 uint32_t dcgiGetQueueFamily(DCgState *state, DCgQueueFamilyType type);
+
+typedef struct { const char *name; bool available; } DCgiSuggestedExtension;
+typedef struct { const char *name; bool available; } DCgiSuggestedLayer;
+
+extern DCgiSuggestedExtension dcgiSuggestedExtensions[]; // extensions that we might need.
+extern DCgiSuggestedLayer dcgiSuggestedLayers[]; // layers that we might need.
+
+enum DCgiSuggestedExtensionIndex {
+    DCGI_SUGGESTED_EXTENSION_DEBUG_REPORT,
+    DCGI_SUGGESTED_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2,
+};
+
+enum DCgiSuggestedLayerIndex {
+    DCGI_SUGGESTED_LAYER_VALIDATION,
+};
+
+void dcgiPrintGlfwErrors();
 
 #endif
