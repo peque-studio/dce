@@ -161,8 +161,6 @@ static void selectPhysicalDevice(DCgState *state) {
 	VkPhysicalDevice *devices = malloc(sizeof(VkPhysicalDevice) * deviceCount);
 	vkEnumeratePhysicalDevices(state->instance, &deviceCount, devices);
 
-
-
 	int maxScrore = 0;
 	for(int i = 0; i < deviceCount; ++i) {
 		VkPhysicalDeviceProperties properties;
@@ -183,6 +181,11 @@ static void selectPhysicalDevice(DCgState *state) {
 		DCD_MSGF(INFO, "Score: %zu", score);
 		if(score > maxScrore) state->physicalDevice = devices[i];
 	}
+}
+
+static void createLogicalDevice(DCgState *state) {
+	VkDeviceCreateInfo createInfo = {0};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 }
 
 DCgState *dcgNewState() {
@@ -206,6 +209,7 @@ void dcgInit(DCgState *state, uint32_t appVersion, const char *appName) {
 
 	createInstance(state, appVersion, appName);
 	selectPhysicalDevice(state);
+	createLogicalDevice(state);
 }
 
 void dcgDeinit(DCgState *state) {
