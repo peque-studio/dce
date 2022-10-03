@@ -146,13 +146,13 @@ DCgMaterial *dcgNewMaterial(
 	createInfo.basePipelineHandle = VK_NULL_HANDLE;
 	createInfo.basePipelineIndex = -1;
 	
-    if(vkCreateGraphicsPipelines(
+    DC_ASSERT(vkCreateGraphicsPipelines(
 		state->device,
 		(VkPipelineCache)cache,
 		1, &createInfo,
 		state->allocator,
 		&material->pipeline
-	) != VK_SUCCESS) DCD_FATAL("Failed to create pipeline!");
+	) == VK_SUCCESS, "Failed to create pipeline!");
 
 	free(shaderStages);
     return material;

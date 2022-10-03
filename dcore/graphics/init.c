@@ -129,8 +129,8 @@ static void createInstance(DCgState *state, uint32_t appVersion, const char *app
 	createInfo.enabledLayerCount = enabledLayerCount;
 	createInfo.ppEnabledLayerNames = enabledLayers;
 	
-	if(vkCreateInstance(&createInfo, state->allocator, &state->instance) != VK_SUCCESS)
-		DCD_FATAL("Failed to create Vulkan Instance");
+	DC_ASSERT(vkCreateInstance(&createInfo, state->allocator, &state->instance) == VK_SUCCESS,
+		"Failed to create Vulkan instance");
 
 	free(enabledExtensions);
 	free(enabledLayers);
@@ -183,9 +183,64 @@ static void selectPhysicalDevice(DCgState *state) {
 	}
 }
 
+static void findQueueFamilies(DCgState *state) {
+	state->computeQueueFamily = UINT32_MAX;
+	state->graphicsQueueFamily = UINT32_MAX;
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(state->physicalDevice, &queueFamilyCount, NULL);
+	VkQueueFamilyProperties *queueFamilies = malloc(sizeof(VkQueueFamilyProperties) * queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(state->physicalDevice, &queueFamilyCount, queueFamilies);
+	for(uint32_t i = 0; i < queueFamilyCount; ++i) {
+		if(queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			state->graphicsQueueFamily = i;
+		if(queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT)
+			state->computeQueueFamily = i;
+	}
+
+	DC_ASSERT(state->graphicsQueueFamily != UINT32_MAX, "Could not find a graphics queue family (required)");
+}
+
+static size_t addUniqueQueueFamily(uint32_t *families, size_t last, uint32_t new) {
+	if(new == UINT32_MAX) return last; // don't add non-existent families.
+	for(size_t i = 0; i < last + 1; ++i) if(new == families[i]) return last;
+	families[last] = new;
+	return last + 1;
+}
+
 static void createLogicalDevice(DCgState *state) {
+	DCD_DEBUG("Creating a logical device...");
+	uint32_t *queueFamilies = malloc(sizeof(uint32_t) * 2); // maximum possible number of queue families.
+	size_t queueFamilyCount = 0;
+	queueFamilyCount = addUniqueQueueFamily(queueFamilies, queueFamilyCount, state->graphicsQueueFamily);
+	queueFamilyCount = addUniqueQueueFamily(queueFamilies, queueFamilyCount, state->computeQueueFamily);
+
+	VkDeviceQueueCreateInfo *queues = malloc(sizeof(VkDeviceQueueCreateInfo) * queueFamilyCount);
+	memset(queues, 0, sizeof(VkDeviceQueueCreateInfo) * queueFamilyCount);
+	float queuePriority = 1.0f;
+	for(int i = 0; i < queueFamilyCount; ++i) {
+		queues[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queues[i].queueCount = 1;
+		queues[i].queueFamilyIndex = queueFamilies[i];
+		queues[i].pQueuePriorities = &queuePriority;
+	}
+
+	VkPhysicalDeviceFeatures features = {0};
+
 	VkDeviceCreateInfo createInfo = {0};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	createInfo.pQueueCreateInfos = queues;
+	createInfo.queueCreateInfoCount = queueFamilyCount;
+	createInfo.enabledExtensionCount = 0;
+	createInfo.ppEnabledExtensionNames = NULL;
+	createInfo.pEnabledFeatures = &features;
+
+	DC_ASSERT(vkCreateDevice(state->physicalDevice, &createInfo, state->allocator, &state->device) == VK_SUCCESS,
+		"Failed to create logical device");
+
+	free(queueFamilies);
+	free(queues);
+	DCD_DEBUG("Logical device created!");
 }
 
 DCgState *dcgNewState() {
@@ -209,10 +264,12 @@ void dcgInit(DCgState *state, uint32_t appVersion, const char *appName) {
 
 	createInstance(state, appVersion, appName);
 	selectPhysicalDevice(state);
+	findQueueFamilies(state);
 	createLogicalDevice(state);
 }
 
 void dcgDeinit(DCgState *state) {
+	vkDestroyDevice(state->device, state->allocator);
 	vkDestroyInstance(state->instance, state->allocator);
 	glfwDestroyWindow(state->window);
 	glfwTerminate();

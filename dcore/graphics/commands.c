@@ -9,7 +9,8 @@ DCgCmdPool *dcgNewCmdPool(DCgState *s, DCgQueueFamilyType type) {
     createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     createInfo.queueFamilyIndex = dcgiGetQueueFamily(s, type);
-    vkCreateCommandPool(s->device, &createInfo, s->allocator, &commandPool);
+    DC_ASSERT(vkCreateCommandPool(s->device, &createInfo, s->allocator, &commandPool) == VK_SUCCESS,
+        "Failed to create command pool!");
     return (void*)commandPool;
 }
 

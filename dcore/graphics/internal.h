@@ -14,6 +14,8 @@ struct DCgState {
 
     VkAllocationCallbacks *allocator;
 
+    uint32_t graphicsQueueFamily, computeQueueFamily;
+
     GLFWwindow *window;
 };
 
