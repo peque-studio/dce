@@ -71,8 +71,8 @@ static const char *messageColor[] = {
 
 static void printSepratator(FILE *sink) {
     for(int j = 0; j < 20 + 54 + 10 + 1; ++j) {
-        if(j == 20 || j == 20 + 54 || j == 20 + 54 + 10)
-            fputc('|', sink);
+        if(j == 20 || j == 20 + 54) fputc('|', sink);
+        else if(j == 20 + 54 + 10) fputc('+', sink);
         else fputc('-', sink);
     }
     fputc('\n', sink);
