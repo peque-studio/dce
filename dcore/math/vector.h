@@ -59,29 +59,29 @@ typedef DCmVector4u32 DCmExtent4;
                                                       DCmVector##K##S vector, \
                                                       T scalar) { BODY }
 
-DCM__T_FOR(DCM__VV_F,, Addv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, +=););
-DCM__T_FOR(DCM__VV_F,, Subv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, -=););
-DCM__T_FOR(DCM__VV_F,, Mulv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, *=););
-DCM__T_FOR(DCM__VV_F,, Divv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, /=););
-DCM__T_FOR(DCM__VS_F,, Adds, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, +=););
-DCM__T_FOR(DCM__VS_F,, Subs, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, -=););
-DCM__T_FOR(DCM__VS_F,, Muls, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, *=););
-DCM__T_FOR(DCM__VS_F,, Divs, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, /=););
-DCM__T_FOR(DCM__SVV_F,, Dot, 2, return a[0] * b[0] + a[1] * b[1];);
-DCM__T_FOR(DCM__VV_F,, Addv, 3, DCM__V3_OP_FOR(DCM__VV_OP, ;, +=););
-DCM__T_FOR(DCM__VV_F,, Subv, 3, DCM__V3_OP_FOR(DCM__VV_OP, ;, -=););
-DCM__T_FOR(DCM__VV_F,, Mulv, 3, DCM__V3_OP_FOR(DCM__VV_OP, ;, *=););
-DCM__T_FOR(DCM__VV_F,, Divv, 3, DCM__V3_OP_FOR(DCM__VV_OP, ;, /=););
-DCM__T_FOR(DCM__VS_F,, Adds, 3, DCM__V3_OP_FOR(DCM__VS_OP, ;, +=););
-DCM__T_FOR(DCM__VS_F,, Subs, 3, DCM__V3_OP_FOR(DCM__VS_OP, ;, -=););
-DCM__T_FOR(DCM__VS_F,, Muls, 3, DCM__V3_OP_FOR(DCM__VS_OP, ;, *=););
-DCM__T_FOR(DCM__VS_F,, Divs, 3, DCM__V3_OP_FOR(DCM__VS_OP, ;, /=););
-DCM__T_FOR(DCM__SVV_F,, Dot, 3, return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];);
+DCM__T_FOR(DCM__VV_F,, Addv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, +=);)
+DCM__T_FOR(DCM__VV_F,, Subv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, -=);)
+DCM__T_FOR(DCM__VV_F,, Mulv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, *=);)
+DCM__T_FOR(DCM__VV_F,, Divv, 2, DCM__V2_OP_FOR(DCM__VV_OP, ;, /=);)
+DCM__T_FOR(DCM__VS_F,, Adds, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, +=);)
+DCM__T_FOR(DCM__VS_F,, Subs, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, -=);)
+DCM__T_FOR(DCM__VS_F,, Muls, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, *=);)
+DCM__T_FOR(DCM__VS_F,, Divs, 2, DCM__V2_OP_FOR(DCM__VS_OP, ;, /=);)
+DCM__T_FOR(DCM__SVV_F,, Dot, 2, return a[0] * b[0] + a[1] * b[1];)
+DCM__T_FOR(DCM__VV_F,, Addv, 3, DCM__V3_OP_FOR(DCM__VV_OP, ;, +=);)
+DCM__T_FOR(DCM__VV_F,, Subv, 3, DCM__V3_OP_FOR(DCM__VV_OP, ;, -=);)
+DCM__T_FOR(DCM__VV_F,, Mulv, 3, DCM__V3_OP_FOR(DCM__VV_OP, ;, *=);)
+DCM__T_FOR(DCM__VV_F,, Divv, 3, DCM__V3_OP_FOR(DCM__VV_OP, ;, /=);)
+DCM__T_FOR(DCM__VS_F,, Adds, 3, DCM__V3_OP_FOR(DCM__VS_OP, ;, +=);)
+DCM__T_FOR(DCM__VS_F,, Subs, 3, DCM__V3_OP_FOR(DCM__VS_OP, ;, -=);)
+DCM__T_FOR(DCM__VS_F,, Muls, 3, DCM__V3_OP_FOR(DCM__VS_OP, ;, *=);)
+DCM__T_FOR(DCM__VS_F,, Divs, 3, DCM__V3_OP_FOR(DCM__VS_OP, ;, /=);)
+DCM__T_FOR(DCM__SVV_F,, Dot, 3, return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];)
 DCM__T_FOR(DCM__VV_F,, Cross, 3,
     dst[0] = dst[1] * src[2] - dst[2] * src[1];
     dst[1] = dst[2] * src[0] - dst[0] * src[2];
     dst[2] = dst[0] * src[1] - dst[1] * src[0];
-);
+)
 
 /* void test() {
     DCmVector2i16 a = { 12, -48 };

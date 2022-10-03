@@ -11,4 +11,8 @@
 
 #define ARRAYSIZE(A) (sizeof(A)/sizeof(0[A]))
 
+#define DC_ASSERT_FALSE(EXPR, MSG) { DCD_MSGF(FATAL, "Assertion failed: %s", #EXPR); \
+    DCD_MSGF(FATAL, "  %s", MSG); } // TODO: DCD_TABSTRING
+#define DC_ASSERT(EXPR, MSG) { if(!(EXPR)) DC_ASSERT_FALSE(EXPR, MSG); }
+
 #endif
