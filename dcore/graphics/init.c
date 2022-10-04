@@ -179,6 +179,27 @@ static void findQueueFamilies(DCgState *state, VkPhysicalDevice physicalDevice, 
 	}
 }
 
+static bool checkDeviceExtensionSupport(VkPhysicalDevice physicalDevice, size_t extCount, const char **exts) {
+	uint32_t propertiesCount = 0;
+	vkEnumerateDeviceExtensionProperties(physicalDevice, NULL, &propertiesCount, NULL);
+	VkExtensionProperties *properties = malloc(sizeof(VkExtensionProperties) * propertiesCount);
+	vkEnumerateDeviceExtensionProperties(physicalDevice, NULL, &propertiesCount, properties);
+
+	size_t notFound = extCount; // number of extensions that are not yet found.
+
+	// TODO: optimize this search.
+	for(uint32_t i = 0; i < extCount; ++i) {
+		for(size_t j = 0; j < propertiesCount; ++j) {
+			if(strcmp(properties[j].extensionName, exts[i]) == 0) {
+				notFound -= 1;
+				break;
+			}
+		}
+	}
+	
+	return notFound == 0;
+}
+
 static void selectPhysicalDevice(DCgState *state) {
 	uint32_t deviceCount;
 	vkEnumeratePhysicalDevices(state->instance, &deviceCount, NULL);
@@ -205,9 +226,22 @@ static void selectPhysicalDevice(DCgState *state) {
 		QueueFamilies queueFamilies;
 		findQueueFamilies(state, devices[i], &queueFamilies);
 
-		if(queueFamilies.graphics == INT32_MAX) score = 0;
-		if(queueFamilies.present == INT32_MAX) score = 0;
+		if(queueFamilies.graphics == INT32_MAX) {
+			DCD_WARNING("No graphics queue family");
+			score = 0;
+		}
+		if(queueFamilies.present == INT32_MAX) {
+			DCD_WARNING("No present queue family");
+			score = 0;
+		}
 		if(queueFamilies.graphics == queueFamilies.present) score += score / 10;
+
+		const char *requiredExtensions[] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+		bool supported = checkDeviceExtensionSupport(devices[i], ARRAYSIZE(requiredExtensions), requiredExtensions);
+		if(!supported) {
+			DCD_WARNING("Required extensions not supported.");
+			score = 0;
+		}
 		
 		DCD_MSGF(INFO, "Score: %zu", score);
 		if(score >= maxScrore) {
