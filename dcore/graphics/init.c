@@ -129,7 +129,7 @@ static void createInstance(DCgState *state, uint32_t appVersion, const char *app
 	createInfo.enabledLayerCount = enabledLayerCount;
 	createInfo.ppEnabledLayerNames = enabledLayers;
 	
-	DC_ASSERT(vkCreateInstance(&createInfo, state->allocator, &state->instance) == VK_SUCCESS,
+	DC_RASSERT(vkCreateInstance(&createInfo, state->allocator, &state->instance) == VK_SUCCESS,
 		"Failed to create Vulkan instance");
 
 	free(enabledExtensions);
@@ -155,6 +155,30 @@ static size_t physicalDeviceTypeScores[] = {
 	2500
 };
 
+typedef struct QueueFamilies {
+	uint32_t graphics, compute, present;
+} QueueFamilies;
+
+static void findQueueFamilies(DCgState *state, VkPhysicalDevice physicalDevice, QueueFamilies *families) {
+	families->compute = UINT32_MAX;
+	families->graphics = UINT32_MAX;
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, NULL);
+	VkQueueFamilyProperties *queueFamilies = malloc(sizeof(VkQueueFamilyProperties) * queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies);
+	for(uint32_t i = 0; i < queueFamilyCount; ++i) {
+		if(queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			families->graphics = i;
+		if(queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT)
+			families->compute = i;
+		VkBool32 supported;
+		vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, state->surface, &supported);
+		if(supported)
+			families->present = i;
+	}
+}
+
 static void selectPhysicalDevice(DCgState *state) {
 	uint32_t deviceCount;
 	vkEnumeratePhysicalDevices(state->instance, &deviceCount, NULL);
@@ -178,27 +202,31 @@ static void selectPhysicalDevice(DCgState *state) {
 			+ (properties.limits.maxFramebufferWidth / 100)
 			* (properties.limits.maxFramebufferHeight / 100);
 		
+		QueueFamilies queueFamilies;
+		findQueueFamilies(state, devices[i], &queueFamilies);
+
+		if(queueFamilies.graphics == INT32_MAX) score = 0;
+		if(queueFamilies.present == INT32_MAX) score = 0;
+		if(queueFamilies.graphics == queueFamilies.present) score += score / 10;
+		
 		DCD_MSGF(INFO, "Score: %zu", score);
-		if(score > maxScrore) state->physicalDevice = devices[i];
+		if(score >= maxScrore) {
+			state->computeQueueFamily = queueFamilies.compute;
+			state->graphicsQueueFamily = queueFamilies.graphics;
+			state->presentQueueFamily = queueFamilies.present;
+			state->physicalDevice = devices[i];
+		}
 	}
+
+	DC_RASSERT(state->graphicsQueueFamily != UINT32_MAX, "Could not find a graphics queue family (required)");
+	DC_RASSERT(state->presentQueueFamily != UINT32_MAX, "Could not find a present queue family (required)");
 }
 
-static void findQueueFamilies(DCgState *state) {
-	state->computeQueueFamily = UINT32_MAX;
-	state->graphicsQueueFamily = UINT32_MAX;
-
-	uint32_t queueFamilyCount = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties(state->physicalDevice, &queueFamilyCount, NULL);
-	VkQueueFamilyProperties *queueFamilies = malloc(sizeof(VkQueueFamilyProperties) * queueFamilyCount);
-	vkGetPhysicalDeviceQueueFamilyProperties(state->physicalDevice, &queueFamilyCount, queueFamilies);
-	for(uint32_t i = 0; i < queueFamilyCount; ++i) {
-		if(queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-			state->graphicsQueueFamily = i;
-		if(queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT)
-			state->computeQueueFamily = i;
-	}
-
-	DC_ASSERT(state->graphicsQueueFamily != UINT32_MAX, "Could not find a graphics queue family (required)");
+static void createSurface(DCgState *state) {
+	DCD_DEBUG("Creating surface...");
+	DC_RASSERT(glfwCreateWindowSurface(state->instance, state->window, state->allocator, &state->surface) == VK_SUCCESS,
+		"Failed to create window surface!");
+	DCD_DEBUG("Done creating surface");
 }
 
 static size_t addUniqueQueueFamily(uint32_t *families, size_t last, uint32_t new) {
@@ -214,6 +242,7 @@ static void createLogicalDevice(DCgState *state) {
 	size_t queueFamilyCount = 0;
 	queueFamilyCount = addUniqueQueueFamily(queueFamilies, queueFamilyCount, state->graphicsQueueFamily);
 	queueFamilyCount = addUniqueQueueFamily(queueFamilies, queueFamilyCount, state->computeQueueFamily);
+	queueFamilyCount = addUniqueQueueFamily(queueFamilies, queueFamilyCount, state->presentQueueFamily);
 
 	VkDeviceQueueCreateInfo *queues = malloc(sizeof(VkDeviceQueueCreateInfo) * queueFamilyCount);
 	memset(queues, 0, sizeof(VkDeviceQueueCreateInfo) * queueFamilyCount);
@@ -227,17 +256,31 @@ static void createLogicalDevice(DCgState *state) {
 
 	VkPhysicalDeviceFeatures features = {0};
 
+	uint32_t propertiesCount;
+	vkEnumerateDeviceExtensionProperties(state->physicalDevice, NULL, &propertiesCount, NULL);
+	VkExtensionProperties *properties = malloc(sizeof(VkExtensionProperties) * propertiesCount);
+	vkEnumerateDeviceExtensionProperties(state->physicalDevice, NULL, &propertiesCount, properties);
+	const char **enabledExtensions = malloc(sizeof(const char *) * propertiesCount); // TODO: this is the maximum number of names
+
+	size_t enabledExtensionCount = 0;
+	for(uint32_t i = 0; i < propertiesCount; ++i) {
+		if(strcmp(properties[i].extensionName, "VK_KHR_portability_subset") == 0)
+			enabledExtensions[enabledExtensionCount++] = properties[i].extensionName;
+	}
+
 	VkDeviceCreateInfo createInfo = {0};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	createInfo.pQueueCreateInfos = queues;
 	createInfo.queueCreateInfoCount = queueFamilyCount;
-	createInfo.enabledExtensionCount = 0;
-	createInfo.ppEnabledExtensionNames = NULL;
+	createInfo.enabledExtensionCount = enabledExtensionCount;
+	createInfo.ppEnabledExtensionNames = enabledExtensions;
 	createInfo.pEnabledFeatures = &features;
 
-	DC_ASSERT(vkCreateDevice(state->physicalDevice, &createInfo, state->allocator, &state->device) == VK_SUCCESS,
+	DC_RASSERT(vkCreateDevice(state->physicalDevice, &createInfo, state->allocator, &state->device) == VK_SUCCESS,
 		"Failed to create logical device");
 
+	free(properties);
+	free(enabledExtensions);
 	free(queueFamilies);
 	free(queues);
 	DCD_DEBUG("Logical device created!");
@@ -263,13 +306,14 @@ void dcgInit(DCgState *state, uint32_t appVersion, const char *appName) {
 	if(state->window == NULL) dcgiPrintGlfwErrors();
 
 	createInstance(state, appVersion, appName);
+	createSurface(state);
 	selectPhysicalDevice(state);
-	findQueueFamilies(state);
 	createLogicalDevice(state);
 }
 
 void dcgDeinit(DCgState *state) {
 	vkDestroyDevice(state->device, state->allocator);
+	vkDestroySurfaceKHR(state->instance, state->surface, state->allocator);
 	vkDestroyInstance(state->instance, state->allocator);
 	glfwDestroyWindow(state->window);
 	glfwTerminate();

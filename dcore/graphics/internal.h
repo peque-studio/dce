@@ -8,13 +8,14 @@ struct DCgState {
     VkInstance instance;
     VkPhysicalDevice physicalDevice;
     VkDevice device;
+    VkSurfaceKHR surface;
 
     size_t renderPassCount;
     VkRenderPass *renderPasses;
 
     VkAllocationCallbacks *allocator;
 
-    uint32_t graphicsQueueFamily, computeQueueFamily;
+    uint32_t graphicsQueueFamily, computeQueueFamily, presentQueueFamily;
 
     GLFWwindow *window;
 };

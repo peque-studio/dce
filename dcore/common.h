@@ -14,5 +14,6 @@
 #define DC_ASSERT_FALSE(EXPR, MSG) { DCD_MSGF(FATAL, "Assertion failed: %s", #EXPR); \
     DCD_MSGF(FATAL, "  %s", MSG); } // TODO: DCD_TABSTRING
 #define DC_ASSERT(EXPR, MSG) { if(!(EXPR)) DC_ASSERT_FALSE(EXPR, MSG); }
+#define DC_RASSERT(EXPR, MSG) { if(!(EXPR)) { DC_ASSERT_FALSE(EXPR, MSG); return; } }
 
 #endif
