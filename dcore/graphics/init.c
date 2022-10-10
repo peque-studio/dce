@@ -230,6 +230,7 @@ static void selectPhysicalDevice(DCgState *state) {
 			DCD_WARNING("No graphics queue family");
 			score = 0;
 		}
+
 		if(queueFamilies.present == INT32_MAX) {
 			DCD_WARNING("No present queue family");
 			score = 0;
@@ -328,6 +329,11 @@ VkQueue dcgiGetQueue(DCgState *state, uint32_t index) {
 	return queues[index];
 }
 
+void createRenderPasses(DCgState *state) {
+	state->renderPassCount = 1;
+	state->renderPasses = malloc(sizeof(VkRenderPass) * state->renderPassCount);
+}
+
 DCgState *dcgNewState() {
 	DCgState *state = malloc(sizeof(DCgState));
 	state->allocator = NULL;
@@ -354,6 +360,9 @@ void dcgInit(DCgState *state, uint32_t appVersion, const char *appName) {
 }
 
 void dcgDeinit(DCgState *state) {
+	// TODO: Assert stuff here.
+	for(size_t i = 0; i < state->renderPassCount; ++i)
+		vkDestroyRenderPass(state->device, state->renderPasses[i], state->allocator);
 	vkDestroyDevice(state->device, state->allocator);
 	vkDestroySurfaceKHR(state->instance, state->surface, state->allocator);
 	vkDestroyInstance(state->instance, state->allocator);
