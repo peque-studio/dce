@@ -3,7 +3,7 @@
 #include <dcore/graphics/internal.h>
 #include <vulkan/vulkan_core.h>
 
-DCgCmdPool *dcgNewCmdPool(DCgState *s, DCgQueueFamilyType type) {
+DCgCmdPool *dcgNewCmdPool(DCgState *s, DCgCmdPoolType type) {
     VkCommandPool commandPool;
     VkCommandPoolCreateInfo createInfo = {0};
     createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;

@@ -25,11 +25,11 @@ void dcgGetMousePosition(DCgState *state, DCmVector2i mousePosition);
 void dcgUpdate(DCgState *state);
 
 typedef enum DCgQueueFamilyType {
-    DCG_QUEUE_FAMILY_TYPE_GRAPHICS,
-    DCG_QUEUE_FAMILY_TYPE_COMPUTE,
-} DCgQueueFamilyType;
+    DCG_CMD_POOL_TYPE_GRAPHICS,
+    DCG_CMD_POOL_TYPE_COMPUTE,
+} DCgCmdPoolType;
 
-DCgCmdPool *dcgNewCmdPool(DCgState *s, DCgQueueFamilyType type);
+DCgCmdPool *dcgNewCmdPool(DCgState *s, DCgCmdPoolType type);
 void dcgFreeCmdPool(DCgState *s, DCgCmdPool *pool);
 
 DCgCmdBuffer *dcgGetNewCmdBuffer(DCgState *s, DCgCmdPool *pool);

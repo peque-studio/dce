@@ -38,7 +38,7 @@ size_t dcgiGetPushConstantRanges(DCgState *state, int index, const VkPushConstan
 size_t dcgiGetSetLayouts(DCgState *state, int index, const VkDescriptorSetLayout **layouts);
 size_t dcgiGetVertexBindings(DCgState *state, int index, const VkVertexInputBindingDescription **descriptions);
 size_t dcgiGetVertexAttributes(DCgState *state, int index, const VkVertexInputAttributeDescription **descriptions);
-uint32_t dcgiGetQueueFamily(DCgState *state, DCgQueueFamilyType type);
+VkQueue dcgiGetQueue(DCgState *state, uint32_t index);
 
 typedef struct { const char *name; bool available; } DCgiSuggestedExtension;
 typedef struct { const char *name; bool available; } DCgiSuggestedLayer;

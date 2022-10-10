@@ -320,6 +320,14 @@ static void createLogicalDevice(DCgState *state) {
 	DCD_DEBUG("Logical device created!");
 }
 
+VkQueue dcgiGetQueue(DCgState *state, uint32_t index) {
+	DC_ASSERT(index < 3, "Queue family index too big!");
+	static VkQueue queues[3] = { 0 }; // TODO: this is the maximum possible number of queues 
+	if(queues[index] != NULL) return queues[index];
+	vkGetDeviceQueue(state->device, index, 0, &queues[index]);
+	return queues[index];
+}
+
 DCgState *dcgNewState() {
 	DCgState *state = malloc(sizeof(DCgState));
 	state->allocator = NULL;
