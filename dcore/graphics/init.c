@@ -334,6 +334,84 @@ void createRenderPasses(DCgState *state) {
 	state->renderPasses = malloc(sizeof(VkRenderPass) * state->renderPassCount);
 }
 
+static void selectPresentMode(DCgState *state) {
+	uint32_t presentModeCount = 0;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(state->physicalDevice, state->surface, &presentModeCount, NULL);
+	VkPresentModeKHR *presentModes = malloc(sizeof(VkPresentModeKHR) * presentModeCount);
+	vkGetPhysicalDeviceSurfacePresentModesKHR(state->physicalDevice, state->surface, &presentModeCount, presentModes);
+	for(uint32_t i = 0; i < presentModeCount; ++i) {
+		if(presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
+			state->presentMode = presentModes[i];
+			free(presentModes);
+			return;
+		}
+	}
+	free(presentModes);
+	state->presentMode = VK_PRESENT_MODE_FIFO_KHR;
+}
+
+static void selectSurfaceFormat(DCgState *state) {
+	uint32_t surfaceFormatCount = 0;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(state->physicalDevice, state->surface, &surfaceFormatCount, NULL);
+	VkSurfaceFormatKHR *surfaceFormats = malloc(sizeof(VkSurfaceFormatKHR) * surfaceFormatCount);
+	vkGetPhysicalDeviceSurfaceFormatsKHR(state->physicalDevice, state->surface, &surfaceFormatCount, surfaceFormats);
+	for(uint32_t i = 0; i < surfaceFormatCount; ++i) {
+		if(surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB
+		&& surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+			state->surfaceFormat = surfaceFormats[i];
+			free(surfaceFormats);
+			return;
+		}
+	}
+
+	state->surfaceFormat = surfaceFormats[0];
+	free(surfaceFormats);
+}
+
+static void createSwapchain(DCgState *state) {
+	VkSurfaceCapabilitiesKHR capabilities;
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(state->physicalDevice, state->surface, &capabilities);
+
+	uint32_t imageCount = capabilities.minImageCount + 1;
+	if(capabilities.maxImageCount > 0
+	&& imageCount > capabilities.maxImageCount) {
+		imageCount = capabilities.maxImageCount;
+	}
+	
+	VkExtent2D extent;
+	glfwGetFramebufferSize(state->window, (int*)&extent.width, (int*)&extent.height);
+
+	selectSurfaceFormat(state);
+	selectPresentMode(state);
+
+	VkSwapchainCreateInfoKHR createInfo = {0};
+	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	createInfo.surface = state->surface;
+	createInfo.minImageCount = imageCount;
+	createInfo.imageFormat = state->surfaceFormat.format;
+	createInfo.imageColorSpace = state->surfaceFormat.colorSpace;
+	createInfo.imageExtent = extent;
+	createInfo.imageArrayLayers = 1;
+	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	createInfo.preTransform = capabilities.currentTransform;
+	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	createInfo.presentMode = state->presentMode;
+	createInfo.clipped = VK_TRUE;
+	createInfo.oldSwapchain = VK_NULL_HANDLE; // TODO: allow setting the oldSwapchain
+
+	uint32_t queueFamilyIndices[] = { state->graphicsQueueFamily, state->presentQueueFamily };
+
+	if(state->graphicsQueueFamily != state->presentQueueFamily) {
+		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		createInfo.queueFamilyIndexCount = 2;
+		createInfo.pQueueFamilyIndices = queueFamilyIndices;
+	} else {
+		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		createInfo.queueFamilyIndexCount = 0;
+		createInfo.pQueueFamilyIndices = NULL;
+	}
+}
+
 DCgState *dcgNewState() {
 	DCgState *state = malloc(sizeof(DCgState));
 	state->allocator = NULL;

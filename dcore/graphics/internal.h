@@ -9,6 +9,9 @@ struct DCgState {
     VkPhysicalDevice physicalDevice;
     VkDevice device;
     VkSurfaceKHR surface;
+    VkSurfaceFormatKHR surfaceFormat;
+
+    VkPresentModeKHR presentMode;
 
     size_t renderPassCount;
     VkRenderPass *renderPasses;
