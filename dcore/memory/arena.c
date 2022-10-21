@@ -1,5 +1,7 @@
 #include <dcore/memory.h>
 
+extern DCmemAllocStats allocStats; // defined in dcore/memory/memory.c
+
 void *dcmemPush(DCmemArena *arena, size_t size) {
     if(arena->size == 0) {
         arena->top = size;

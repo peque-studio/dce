@@ -410,11 +410,14 @@ static void createSwapchain(DCgState *state) {
 		createInfo.queueFamilyIndexCount = 0;
 		createInfo.pQueueFamilyIndices = NULL;
 	}
+
+	DC_RASSERT(vkCreateSwapchainKHR(state->device, &createInfo, state->allocator, &state->swapchain) == VK_SUCCESS,
+		"Failed to create swapchain");
 }
 
 DCgState *dcgNewState() {
 	DCgState *state = malloc(sizeof(DCgState));
-	state->allocator = NULL;
+	state->allocator = NULL; // TODO: custom state->allocator for logging
 	state->instance = NULL;
 	state->physicalDevice = NULL;
 	return state;
@@ -435,10 +438,12 @@ void dcgInit(DCgState *state, uint32_t appVersion, const char *appName) {
 	createSurface(state);
 	selectPhysicalDevice(state);
 	createLogicalDevice(state);
+	createSwapchain(state);
 }
 
 void dcgDeinit(DCgState *state) {
 	// TODO: Assert stuff here.
+	vkDestroySwapchainKHR(state->device, state->swapchain, state->allocator);
 	for(size_t i = 0; i < state->renderPassCount; ++i)
 		vkDestroyRenderPass(state->device, state->renderPasses[i], state->allocator);
 	vkDestroyDevice(state->device, state->allocator);

@@ -9,6 +9,11 @@ typedef struct DCmemArena {
     void *memory;
 } DCmemArena;
 
+typedef struct DCmemAllocStats {
+    size_t allocCount, deallocCount, reallocCount;
+    size_t arenaPushCount, arenaPopCount;
+} DCmemAllocStats;
+
 void *dcmemPush(DCmemArena *arena, size_t size);
 void dcmemPop(DCmemArena *arena, size_t size);
 
@@ -18,5 +23,7 @@ void *dcmemReallocate(void *pointer, size_t size);
 
 #define DCMEM_PUSH(ARENA, TYPE) (((TYPE)*)dcmemPush((ARENA), sizeof(TYPE)))
 #define DCMEM_POP(ARENA, TYPE) dcmemPop((ARENA), sizeof(TYPE))
+
+void printAllocationStats();
 
 #endif

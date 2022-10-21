@@ -16,6 +16,8 @@ struct DCgState {
     size_t renderPassCount;
     VkRenderPass *renderPasses;
 
+    VkSwapchainKHR swapchain;
+
     VkAllocationCallbacks *allocator;
 
     uint32_t graphicsQueueFamily, computeQueueFamily, presentQueueFamily;
