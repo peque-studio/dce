@@ -2,6 +2,13 @@
 *.d
 dist/*
 bin/*
+lib/*
 out/*
 
 *_scrot.png
+*.ninja
+*cache*
+.ninja_log
+compile_commands.json
+
+./dce

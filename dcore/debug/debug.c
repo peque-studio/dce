@@ -5,6 +5,13 @@
 #include <string.h>
 #include <time.h>
 
+#if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
+#include <unistd.h>
+#define ISATTY(FILE) (isatty(fileno((FILE))))
+#else
+#define ISATTY(FILE) 1
+#endif
+
 static void defaultFatalHandler() {
     exit(1);
 }
@@ -80,7 +87,7 @@ static void printSepratator(FILE *sink) {
 
 void dcdMsgF(DCdMsgType type, const char *file, const char *func, int line, const char *fmt, ...) {
     // increment stats
-    if(type < 10000) {
+    if((int)type < 10000) {
         dcdGetCurrentContext()->stats.total += 1;
         *(&dcdGetCurrentContext()->stats.debug + (size_t)type) += 1;
     }
@@ -95,16 +102,16 @@ void dcdMsgF(DCdMsgType type, const char *file, const char *func, int line, cons
 
     for(int i = 0; i < sinkCount; ++i) {
         // TODO: Configure separator length (also whether it exists or not) and char
-        if(type == 10000) printSepratator(sinks[i]);
+        if((int)type == 10000) printSepratator(sinks[i]);
         fprintf(sinks[i], "%s%s | %25s:%-3d @%-20s | %7s | ",
-            type >= 10000 ? "" : messageColor[type], timeString,
+            (!ISATTY(sinks[i]) || (int)type >= 10000) ? "" : messageColor[type], timeString,
             file, line, func,
-            type >= 10000 ? "" : messageTypePrefix[type]
+            (int)type >= 10000 ? "" : messageTypePrefix[type]
         );
         
         // indentation
         // TODO: different indent size
-        for(int j = 0; j < contextStackSize - 1 - (type == 10001 ? 1 : 0); ++j) {
+        for(int j = 0; j < contextStackSize - 1 - ((int)type == 10001 ? 1 : 0); ++j) {
             fputs("  ", sinks[i]);
         }
 
@@ -113,7 +120,7 @@ void dcdMsgF(DCdMsgType type, const char *file, const char *func, int line, cons
         vfprintf(sinks[i], fmt, va);
         va_end(va);
 
-        fputs("\033[m\n", sinks[i]);
+        if(ISATTY(sinks[i])) fputs("\033[m\n", sinks[i]);
     }
 
     if(type == DCD_MSG_TYPE_FATAL) fatalHandler();

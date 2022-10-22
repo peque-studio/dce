@@ -1,4 +1,0 @@
--I.
--Wall
--Wpedantic
--Wno-gnu-zero-variadic-macro-arguments

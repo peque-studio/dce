@@ -58,15 +58,15 @@ void dcdMsgF(DCdMsgType type, const char *file, const char *func, int line, cons
 void dcdInit(const char *name);
 void dcdDeInit();
 
-#define DCD_MSGF(T, FMT, ...) DCD_EMSGF(DCD_MSG_TYPE_##T, FMT, __VA_ARGS__)
-#define DCD_EMSGF(T, FMT, ...) dcdMsgF(T, __FILE__, __func__, __LINE__, FMT __VA_OPT__(,) __VA_ARGS__)
+#define DCD_MSGF(T, FMT, ...) DCD_EMSGF(DCD_MSG_TYPE_##T, FMT, ##__VA_ARGS__)
+#define DCD_EMSGF(T, FMT, ...) dcdMsgF(T, __FILE__, __func__, __LINE__, FMT, ##__VA_ARGS__)
 #define DEBUGIF(COND) if(COND)
 
-#define DCD_DEBUG(FMT, ...) DCD_MSGF(DEBUG, FMT, __VA_ARGS__);
-#define DCD_INFO(FMT, ...) DCD_MSGF(INFO, FMT, __VA_ARGS__);
-#define DCD_SUCCESS(FMT, ...) DCD_MSGF(SUCCESS, FMT, __VA_ARGS__);
-#define DCD_WARNING(FMT, ...) DCD_MSGF(WARNING, FMT, __VA_ARGS__);
-#define DCD_ERROR(FMT, ...) DCD_MSGF(ERROR, FMT, __VA_ARGS__);
-#define DCD_FATAL(FMT, ...) DCD_MSGF(FATAL, FMT, __VA_ARGS__);
+#define DCD_DEBUG(FMT, ...) DCD_MSGF(DEBUG, FMT, ##__VA_ARGS__)
+#define DCD_INFO(FMT, ...) DCD_MSGF(INFO, FMT, ##__VA_ARGS__)
+#define DCD_SUCCESS(FMT, ...) DCD_MSGF(SUCCESS, FMT, ##__VA_ARGS__)
+#define DCD_WARNING(FMT, ...) DCD_MSGF(WARNING, FMT, ##__VA_ARGS__)
+#define DCD_ERROR(FMT, ...) DCD_MSGF(ERROR, FMT, ##__VA_ARGS__)
+#define DCD_FATAL(FMT, ...) DCD_MSGF(FATAL, FMT, ##__VA_ARGS__)
 
 #endif
