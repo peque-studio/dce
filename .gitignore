@@ -1,9 +1,9 @@
 *.o
 *.d
 dist/*
-bin/*
-lib/*
-out/*
+bin
+lib
+out
 
 *_scrot.png
 *.ninja
