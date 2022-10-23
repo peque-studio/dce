@@ -32,4 +32,6 @@ breathe_domain_by_extension = {
 	"h" : "c",
 }
 
+breathe_default_members = ('members', 'undoc-members')
+
 breathe_default_project = "DCE"
