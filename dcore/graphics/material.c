@@ -14,7 +14,7 @@ void CreateLayout_(
 	createInfo.pushConstantRangeCount = (uint32_t)dcgiGetPushConstantRanges(state, options->pushConstantsIndex, NULL);
 	dcgiGetPushConstantRanges(state, 0, &createInfo.pPushConstantRanges);
 	createInfo.setLayoutCount = (uint32_t)dcgiGetSetLayouts(state, options->descriptorSetsIndex, NULL);
-	dcgiGetSetLayouts(state, 0, &createInfo.pSetLayouts);
+	dcgiGetSetLayouts(state, options->descriptorSetsIndex, &createInfo.pSetLayouts);
 	vkCreatePipelineLayout(state->device, &createInfo, NULL, &material->layout);
 }
 

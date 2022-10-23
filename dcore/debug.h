@@ -1,6 +1,7 @@
 #ifndef DCORE_DEBUG_H
 #define DCORE_DEBUG_H
 #include <stddef.h> // size_t, can't include dcore/common.h since it includes this header.
+#include <stdio.h> // FILE*
 
 void dcdInit();
 void dcdDeInit();
@@ -54,6 +55,12 @@ size_t dcdPopContext(const char *file, const char *func, int line);
 size_t dcdPopContextQuiet();
 
 void dcdMsgF(DCdMsgType type, const char *file, const char *func, int line, const char *fmt, ...);
+
+/** adds a sink. */
+void dcdAddSink(FILE *sink);
+
+/** removes a sink. @note warning if sink doesn't exist. */
+void dcdRemoveSink(FILE *sink);
 
 void dcdInit(const char *name);
 void dcdDeInit();

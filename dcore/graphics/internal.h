@@ -23,6 +23,30 @@ struct DCgState {
     uint32_t graphicsQueueFamily, computeQueueFamily, presentQueueFamily;
 
     GLFWwindow *window;
+
+    size_t pushConstantRangesCount;
+    struct {
+        size_t count;
+        VkPushConstantRange ranges[];
+    } *pushConstantRanges;
+
+    size_t descriptorSetLayoutsCount;
+    struct {
+        size_t count;
+        VkDescriptorSetLayout layouts[];
+    } *descriptorSetLayouts;
+
+    size_t vertexBindingsCount;
+    struct {
+        size_t count;
+        VkVertexInputBindingDescription bindings[];
+    } *vertexBindings;
+
+    size_t vertexAttributesCount;
+    struct {
+        size_t count;
+        VkVertexInputAttributeDescription attributes[];
+    } *vertexAttributes;
 };
 
 struct DCgMaterial {
@@ -30,15 +54,22 @@ struct DCgMaterial {
     VkPipelineLayout layout;
 };
 
-void dcgiAddRenderPass(
+VkRenderPass dcgiAddRenderPass(
     DCgState *state,
     size_t attachmentCount,
     VkAttachmentDescription *attachments,
     size_t subpassCount,
-    VkSubpassDescription *subpasses
+    VkSubpassDescription *subpasses,
+	size_t dependencyCount,
+	VkSubpassDependency *dependencies
 );
 
-VkRenderPass dcgiGetRenderPass(DCgState *state, int index);
+VkPushConstantRange *dcgiAddPushConstantRanges(DCgState *state, size_t count);
+VkDescriptorSetLayout *dcgiAddDescriptorSetLayouts(DCgState *state, size_t count);
+VkVertexInputBindingDescription *dcgiAddVertexBindings(DCgState *state, size_t count);
+VkVertexInputAttributeDescription *dcgiAddVertexAttributes(DCgState *state, size_t count);
+
+VkRenderPass dcgiGetRenderPass(DCgState *state, size_t index);
 size_t dcgiGetPushConstantRanges(DCgState *state, int index, const VkPushConstantRange **ranges);
 size_t dcgiGetSetLayouts(DCgState *state, int index, const VkDescriptorSetLayout **layouts);
 size_t dcgiGetVertexBindings(DCgState *state, int index, const VkVertexInputBindingDescription **descriptions);

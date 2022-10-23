@@ -34,5 +34,5 @@ DCT_TEST(failTest, "test that will fail :(") {
     DCT_ASSERT(0 == 0, "check for sanity");
     DCT_ASSERT(1 == 0, "check for inconsistency");
     DCT_ASSERT(1 == 0, "check for insanity but not inverted");
-    return 1;
+    return 0;
 }

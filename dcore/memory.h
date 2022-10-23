@@ -1,6 +1,6 @@
 #ifndef DCORE_MEMORY_H
 #define DCORE_MEMORY_H
-#include <dcore/common.h>
+#include <stddef.h>
 
 typedef struct DCmemArena {
     size_t size;

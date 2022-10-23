@@ -129,11 +129,32 @@ void dcdMsgF(DCdMsgType type, const char *file, const char *func, int line, cons
 void dcdInit(const char *name) {
     fatalHandler = &defaultFatalHandler;
     sinkCount = 1;
-    sinks = malloc(sinkCount * sizeof(FILE**));
+    sinks = malloc(sinkCount * sizeof(FILE*));
     sinks[0] = stdout;
     contextStack = NULL;
     contextStackSize = 0;
     dcdPushContextQuiet(name);
+}
+
+void dcdAddSink(FILE *sink) {
+    sinks = realloc(sinks, ++sinkCount * sizeof(FILE*));
+    sinks[sinkCount - 1] = sink;
+}
+
+void dcdRemoveSink(FILE *sink) {
+    size_t pos = 0;
+    for(; pos <= sinkCount; ++pos)
+        if(pos < sinkCount && sinks[pos] == sink) break;
+    
+    if(pos == sinkCount) {
+        DCD_WARNING("Tried to remove non-existing sink!");
+        return;
+    }
+    
+    for(size_t i = pos + 1; i < sinkCount; ++i)
+        sinks[i - 1] = sinks[i];
+    
+    sinks = realloc(sinks, --sinkCount * sizeof(FILE*));
 }
 
 void dcdDeInit() {
