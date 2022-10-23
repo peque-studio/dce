@@ -28,4 +28,8 @@ breathe_projects = {
 	"DCE": "../out/xml"
 }
 
+breathe_domain_by_extension = {
+	"h" : "c",
+}
+
 breathe_default_project = "DCE"
