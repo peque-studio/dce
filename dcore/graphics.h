@@ -14,13 +14,29 @@ typedef void *DCgCmdPool;
 typedef DCgBuffer DCgVertexBuffer;
 typedef DCgBuffer DCgIndexBuffer;
 
+/** Creates and allocates a graphics state */
 DCgState *dcgNewState();
+
+/**
+ * Initializes a graphics state.
+ * @param appVersion client version.
+ * @param appName client name.
+ **/
 void dcgInit(DCgState *s, uint32_t appVersion, const char *appName);
+
+/** Deinitializes a graphics state. */
 void dcgDeinit(DCgState *s);
+
+/** Frees a graphics state. */
 void dcgFreeState(DCgState *state);
 
+/** Returns whether the window should close or not. */
 bool dcgShouldClose(DCgState *state);
+
+/** Closes the window. (shouldClose flag is set) */
 void dcgClose(DCgState *state);
+
+/** Retries the position of the mouse relative to the window. */
 void dcgGetMousePosition(DCgState *state, DCmVector2i mousePosition);
 void dcgUpdate(DCgState *state);
 
