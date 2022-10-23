@@ -1,0 +1,7 @@
+out
+lib
+bin
+.cache
+*.ninja
+.ninja_log
+LICENSE
