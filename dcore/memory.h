@@ -17,9 +17,13 @@ typedef struct DCmemAllocStats {
 void *dcmemPush(DCmemArena *arena, size_t size);
 void dcmemPop(DCmemArena *arena, size_t size);
 
+#if defined(DC_DEBUG)
+
 void *dcmemAllocate(size_t size);
 void dcmemDeallocate(void *pointer);
 void *dcmemReallocate(void *pointer, size_t size);
+
+#endif
 
 #define DCMEM_PUSH(ARENA, TYPE) (((TYPE)*)dcmemPush((ARENA), sizeof(TYPE)))
 #define DCMEM_POP(ARENA, TYPE) dcmemPop((ARENA), sizeof(TYPE))
