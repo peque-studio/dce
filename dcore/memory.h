@@ -19,10 +19,18 @@ void dcmemPop(DCmemArena *arena, size_t size);
 
 #if defined(DC_DEBUG)
 
-void *dcmemAllocate(size_t size);
-void dcmemDeallocate(void *pointer);
-void *dcmemReallocate(void *pointer, size_t size);
+void *dcmemAllocate_(size_t size, const char *f, const char *u, int l);
+void dcmemDeallocate_(void *pointer, const char *f, const char *u, int l);
+void *dcmemReallocate_(void *pointer, size_t size, const char *f, const char *u, int l);
+#define dcmemAllocate(size) dcmemAllocate_((size), __FILE__, __func__, __LINE__)
+#define dcmemDeallocate(pointer) dcmemDeallocate_((pointer), __FILE__, __func__, __LINE__)
+#define dcmemReallocate(pointer, size) dcmemReallocate_((pointer), (size), __FILE__, __func__, __LINE__)
 
+#else
+#  include <stdlib.h>
+#  define dcmemAllocate(size) malloc(size)
+#  define dcmemDeallocate(pointer) free(pointer)
+#  define dcmemReallocate(pointer, size) reallocate(pointer, size)
 #endif
 
 #define DCMEM_PUSH(ARENA, TYPE) (((TYPE)*)dcmemPush((ARENA), sizeof(TYPE)))

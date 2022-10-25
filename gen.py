@@ -222,6 +222,13 @@ def parse_cmds(cmdstr: str) -> list[CmdInfo]:
       
   return cmds
 
+parse_vars_pattern = re.compile(r'\$(\{([\w_]+)\}|([\w_]+))')
+def parse_vars(s: str) -> str:
+  res = list(s)
+  for match in re.finditer(parse_vars_pattern, s):
+    res[match.start():match.end()] = match.group(1)
+  return ''.join(res)
+
 def parse_project_cfg(parser: configparser.ConfigParser) -> ProjectCfgFile:
   cfg = ProjectCfgFile(
     cfg = ProjectCfg(
@@ -230,7 +237,7 @@ def parse_project_cfg(parser: configparser.ConfigParser) -> ProjectCfgFile:
       deps = parser.get("cfg", "deps", fallback="").split(),
       cmds = parse_cmds(parser.get("cfg", "cmds")),
       srcs = parser.get("cfg", "srcs").split(),
-      expt = parser.get("cfg", "expt", fallback="").split(),
+      expt = list(map(parse_vars, parser.get("cfg", "expt", fallback="").split())),
     ),
     vars = dict(parser.items("var")),
     includes = {}
