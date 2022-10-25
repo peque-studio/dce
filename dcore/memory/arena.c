@@ -1,4 +1,5 @@
 #include <dcore/memory.h>
+#include <dcore/common.h>
 
 extern DCmemAllocStats allocStats; // defined in dcore/memory/memory.c
 

@@ -451,6 +451,15 @@ void dcgInit(DCgState *state, uint32_t appVersion, const char *appName) {
 void dcgDeinit(DCgState *state) {
 	// TODO: Assert stuff here.
 	vkDestroySwapchainKHR(state->device, state->swapchain, state->allocator);
+	for(size_t i = 0; i < state->descriptorSetLayoutsCount; ++i)
+		for(size_t j = 0; j < state->descriptorSetLayouts[i].count; ++j)
+			vkDestroyDescriptorSetLayout(
+				state->device,
+				state->descriptorSetLayouts[i].layouts[j],
+				state->allocator
+			);
+	dcmemDeallocate(state->descriptorSetLayouts);
+	dcmemDeallocate(state->pushConstantRanges);
 	for(size_t i = 0; i < state->renderPassCount; ++i)
 		vkDestroyRenderPass(state->device, state->renderPasses[i], state->allocator);
 	vkDestroyDevice(state->device, state->allocator);
@@ -623,6 +632,7 @@ VkRenderPass dcgiAddRenderPass(
 	VkSubpassDependency *dependencies
 ) {
 	VkRenderPassCreateInfo createInfo = {0};
+	createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	createInfo.subpassCount = subpassCount;
 	createInfo.pSubpasses = subpasses;
 	createInfo.attachmentCount = attachmentCount;

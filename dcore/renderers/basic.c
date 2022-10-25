@@ -1,7 +1,7 @@
 #include <dcore/graphics/internal.h>
 #include <dcore/renderers/basic.h>
 
-void DCgBasicRendererCreateInfo(DCgState *state) {
+void dcgBasicRendererCreateInfo(DCgState *state) {
 	VkAttachmentDescription attachments[2] = {
 		(VkAttachmentDescription){
 			.format = state->surfaceFormat.format,
@@ -15,7 +15,7 @@ void DCgBasicRendererCreateInfo(DCgState *state) {
 			.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 		},
 		(VkAttachmentDescription){
-			.format = state->surfaceFormat.format,
+			.format = VK_FORMAT_D32_SFLOAT, // TODO: find best format, this one may not be supported
 			.flags = 0,
 			.samples = VK_SAMPLE_COUNT_1_BIT,
 			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
@@ -34,7 +34,7 @@ void DCgBasicRendererCreateInfo(DCgState *state) {
 		},
 		(VkAttachmentReference){
 			.attachment = 1,
-			.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+			.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 		}
 	};
 
