@@ -23,16 +23,16 @@ DCT_TEST(graphicsInit, "graphics initialization test") {
     return 0;
 }
 
-DCT_TEST(assertionTest, "test that won't fail!") {
-    DCT_ASSERT(0 == 0, "check for sanity");
-    DCT_ASSERT(1 == 1, "check for consistency");
-    DCT_ASSERT(1 != 0, "check for insanity but inverted");
-    return 0;
-}
+// DCT_TEST(assertionTest, "test that won't fail!") {
+//     DCT_ASSERT(0 == 0, "check for sanity");
+//     DCT_ASSERT(1 == 1, "check for consistency");
+//     DCT_ASSERT(1 != 0, "check for insanity but inverted");
+//     return 0;
+// }
 
-DCT_TEST(failTest, "test that will fail :(") {
-    DCT_ASSERT(0 == 0, "check for sanity");
-    DCT_ASSERT(1 == 0, "check for inconsistency");
-    DCT_ASSERT(1 == 0, "check for insanity but not inverted");
-    return 0;
-}
+// DCT_TEST(failTest, "test that will fail :(") {
+//     DCT_ASSERT(0 == 0, "check for sanity");
+//     DCT_ASSERT(1 == 0, "check for inconsistency");
+//     DCT_ASSERT(1 == 0, "check for insanity but not inverted");
+//     return 0;
+// }
