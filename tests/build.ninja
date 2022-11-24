@@ -1,0 +1,12 @@
+
+build bin/tests/main.o: cc tests/main.c
+build bin/tests/test.o: cc tests/test.c
+build bin/tests/DCg/basic.o: cc tests/DCg/basic.c
+build bin/tests/DCg/init.o: cc tests/DCg/init.c
+
+build out/dce-tests: ld $
+  bin/tests/main.o $
+  bin/tests/test.o $
+  bin/tests/DCg/basic.o $
+  bin/tests/DCg/init.o $
+  lib/libdce.a

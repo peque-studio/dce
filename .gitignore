@@ -6,7 +6,6 @@ lib
 out
 
 *_scrot.png
-*.ninja
 *cache*
 .cache
 .ninja_log

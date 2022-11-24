@@ -1,16 +1,16 @@
 #include <dcore/debug.h>
 #include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
 #if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
 #include <unistd.h>
+int fileno(FILE *stream);
 #define ISATTY(FILE) (isatty(fileno((FILE))))
 #else
 #define ISATTY(FILE) 1
 #endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 static void defaultFatalHandler() {
     exit(1);

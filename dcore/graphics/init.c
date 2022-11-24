@@ -427,6 +427,12 @@ DCgState *dcgNewState() {
 	state->instance = NULL;
 	state->physicalDevice = NULL;
 	state->renderPassCount = 0;
+
+	state->renderPassCount = 0;
+	state->descriptorSetLayoutsCount = 0;
+	state->vertexAttributesCount = 0;
+	state->vertexBindingsCount = 0;
+	state->pushConstantRangesCount = 0;
 	return state;
 }
 
@@ -449,13 +455,15 @@ void dcgInit(DCgState *state, uint32_t appVersion, const char *appName) {
 }
 
 void dcgDeinit(DCgState *state) {
-	// TODO: Assert stuff here.
-	vkDestroySwapchainKHR(state->device, state->swapchain, state->allocator);
+	if(state->swapchain != VK_NULL_HANDLE)
+		vkDestroySwapchainKHR(state->device, state->swapchain, state->allocator);
 
 	if(state->renderPassCount) {
 		DC_ASSERT(state->renderPasses != NULL, "state->renderPasses == NULL and state->renderPassCount != 0");
 		for(size_t i = 0; i < state->renderPassCount; ++i)
-			vkDestroyRenderPass(state->device, state->renderPasses[i], state->allocator);
+			if(state->renderPasses[i] == VK_NULL_HANDLE)
+				vkDestroyRenderPass(state->device, state->renderPasses[i], state->allocator);
+			else DCD_WARNING("state->renderPasses[%zu] == VK_NULL_HANDLE", i);
 		dcmemDeallocate(state->renderPasses);
 	}
 
@@ -464,7 +472,9 @@ void dcgDeinit(DCgState *state) {
 		for(size_t i = 0; i < state->descriptorSetLayoutsCount; ++i)
 			for(size_t j = 0; j < state->descriptorSetLayouts[i].count; ++j) {
 				VkDescriptorSetLayout *layouts = state->descriptorSetLayouts[i].layouts;
-				vkDestroyDescriptorSetLayout(state->device, layouts[i], state->allocator);
+				if(layouts[j] == VK_NULL_HANDLE)
+					vkDestroyDescriptorSetLayout(state->device, layouts[j], state->allocator);
+				else DCD_WARNING("state->descriptorSetLayouts[%zu].layouts[%zu] == VK_NULL_HANDLE", i, j);
 			}
 		dcmemDeallocate(state->descriptorSetLayouts);
 	}
@@ -639,6 +649,7 @@ VkRenderPass dcgiAddRenderPass(
 	VkSubpassDependency *dependencies
 ) {
 	VkRenderPassCreateInfo createInfo = {0};
+	createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	createInfo.subpassCount = subpassCount;
 	createInfo.pSubpasses = subpasses;
 	createInfo.attachmentCount = attachmentCount;
