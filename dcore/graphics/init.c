@@ -18,7 +18,7 @@ DCgiSuggestedExtension suggestedExtensions[] = {
 // layers that we might need.
 DCgiSuggestedLayer suggestedLayers[] = {
 	[DCGI_SUGGESTED_LAYER_VALIDATION]
-		= { "VK_LAYER_KHRONOS_validation", true },
+		= { "VK_LAYER_KHRONOS_validation", false },
 };
 
 static void createInstance(DCgState *state, uint32_t appVersion, const char *appName) {
