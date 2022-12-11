@@ -1,5 +1,11 @@
 <h1 align=center>DragonCore Engine</h1>
 
+<h2 align=center>Building</h2>
+
+> Requirements: ninja, clang, glfw 3, vulkan, optional vulkan validation layers
+
+To build, simply run `ninja`. The binary is `out/dce-tests`.
+
 <h2 align=center>Architecture</h2>
 
 <h3 align=center>Assets</h3>
