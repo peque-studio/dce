@@ -18,7 +18,7 @@ DCgiSuggestedExtension suggestedExtensions[] = {
 // layers that we might need.
 DCgiSuggestedLayer suggestedLayers[] = {
 	[DCGI_SUGGESTED_LAYER_VALIDATION]
-		= { "VK_LAYER_KHRONOS_validation", false },
+		= { "VK_LAYER_KHRONOS_validation", true },
 };
 
 static void createInstance(DCgState *state, uint32_t appVersion, const char *appName) {
@@ -455,8 +455,9 @@ void dcgInit(DCgState *state, uint32_t appVersion, const char *appName) {
 }
 
 void dcgDeinit(DCgState *state) {
-	if(state->swapchain != VK_NULL_HANDLE)
+	if(state->swapchain != VK_NULL_HANDLE) {
 		vkDestroySwapchainKHR(state->device, state->swapchain, state->allocator);
+	}
 
 	if(state->renderPassCount) {
 		DC_ASSERT(state->renderPasses != NULL, "state->renderPasses == NULL and state->renderPassCount != 0");
