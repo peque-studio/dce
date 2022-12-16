@@ -1,35 +1,36 @@
 #ifndef DCORE_DEBUG_H
 #define DCORE_DEBUG_H
 #include <stddef.h> // size_t, can't include dcore/common.h since it includes this header.
+#include <stdio.h>  // FILE*
 
 void dcdInit();
 void dcdDeInit();
 
 typedef enum DCdMsgType {
-    DCD_MSG_TYPE_DEBUG,
-    DCD_MSG_TYPE_INFO,
-    DCD_MSG_TYPE_WARNING,
-    DCD_MSG_TYPE_ERROR,
-    DCD_MSG_TYPE_FATAL,
-    DCD_MSG_TYPE_SUCCESS,
+	DCD_MSG_TYPE_DEBUG,
+	DCD_MSG_TYPE_INFO,
+	DCD_MSG_TYPE_WARNING,
+	DCD_MSG_TYPE_ERROR,
+	DCD_MSG_TYPE_FATAL,
+	DCD_MSG_TYPE_SUCCESS,
 } DCdMsgType;
 
 typedef struct DCdMsgStats {
-    size_t total;
-    unsigned int debug;
-    unsigned int info;
-    unsigned int warning;
-    unsigned int error;
-    unsigned int fatal;
-    unsigned int success;
+	size_t total;
+	unsigned int debug;
+	unsigned int info;
+	unsigned int warning;
+	unsigned int error;
+	unsigned int fatal;
+	unsigned int success;
 } DCdMsgStats;
 
 typedef struct DCdContext {
-    const char *name;
-    DCdMsgStats stats;
+	const char *name;
+	DCdMsgStats stats;
 } DCdContext;
 
-typedef void(*DCdFatalHandler)();
+typedef void (*DCdFatalHandler)();
 
 void dcdSetFatalHandler(DCdFatalHandler handler);
 DCdFatalHandler dcdGetFatalHandler();
@@ -55,18 +56,24 @@ size_t dcdPopContextQuiet();
 
 void dcdMsgF(DCdMsgType type, const char *file, const char *func, int line, const char *fmt, ...);
 
+/** adds a sink. */
+void dcdAddSink(FILE *sink);
+
+/** removes a sink. @note warning if sink doesn't exist. */
+void dcdRemoveSink(FILE *sink);
+
 void dcdInit(const char *name);
 void dcdDeInit();
 
-#define DCD_MSGF(T, FMT, ...) DCD_EMSGF(DCD_MSG_TYPE_##T, FMT, __VA_ARGS__)
-#define DCD_EMSGF(T, FMT, ...) dcdMsgF(T, __FILE__, __func__, __LINE__, FMT __VA_OPT__(,) __VA_ARGS__)
+#define DCD_MSGF(T, FMT, ...) DCD_EMSGF(DCD_MSG_TYPE_##T, FMT, ##__VA_ARGS__)
+#define DCD_EMSGF(T, FMT, ...) dcdMsgF(T, __FILE__, __func__, __LINE__, FMT, ##__VA_ARGS__)
 #define DEBUGIF(COND) if(COND)
 
-#define DCD_DEBUG(FMT, ...) DCD_MSGF(DEBUG, FMT, __VA_ARGS__);
-#define DCD_INFO(FMT, ...) DCD_MSGF(INFO, FMT, __VA_ARGS__);
-#define DCD_SUCCESS(FMT, ...) DCD_MSGF(SUCCESS, FMT, __VA_ARGS__);
-#define DCD_WARNING(FMT, ...) DCD_MSGF(WARNING, FMT, __VA_ARGS__);
-#define DCD_ERROR(FMT, ...) DCD_MSGF(ERROR, FMT, __VA_ARGS__);
-#define DCD_FATAL(FMT, ...) DCD_MSGF(FATAL, FMT, __VA_ARGS__);
+#define DCD_DEBUG(FMT, ...) DCD_MSGF(DEBUG, FMT, ##__VA_ARGS__)
+#define DCD_INFO(FMT, ...) DCD_MSGF(INFO, FMT, ##__VA_ARGS__)
+#define DCD_SUCCESS(FMT, ...) DCD_MSGF(SUCCESS, FMT, ##__VA_ARGS__)
+#define DCD_WARNING(FMT, ...) DCD_MSGF(WARNING, FMT, ##__VA_ARGS__)
+#define DCD_ERROR(FMT, ...) DCD_MSGF(ERROR, FMT, ##__VA_ARGS__)
+#define DCD_FATAL(FMT, ...) DCD_MSGF(FATAL, FMT, ##__VA_ARGS__)
 
 #endif

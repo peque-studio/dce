@@ -4,47 +4,37 @@
 #include <stdlib.h>
 #include <vulkan/vulkan_core.h>
 
-void CreateLayout_(
-	DCgState *state,
-	DCgMaterial *material,
-	DCgMaterialOptions *options
-) {
-	VkPipelineLayoutCreateInfo createInfo = {0};
+void CreateLayout_(DCgState *state, DCgMaterial *material, DCgMaterialOptions *options) {
+	VkPipelineLayoutCreateInfo createInfo = { 0 };
 	createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	createInfo.pushConstantRangeCount = (uint32_t)dcgiGetPushConstantRanges(state, options->pushConstantsIndex, NULL);
 	dcgiGetPushConstantRanges(state, 0, &createInfo.pPushConstantRanges);
 	createInfo.setLayoutCount = (uint32_t)dcgiGetSetLayouts(state, options->descriptorSetsIndex, NULL);
-	dcgiGetSetLayouts(state, 0, &createInfo.pSetLayouts);
+	dcgiGetSetLayouts(state, options->descriptorSetsIndex, &createInfo.pSetLayouts);
 	vkCreatePipelineLayout(state->device, &createInfo, NULL, &material->layout);
 }
 
-DCgMaterial *dcgNewMaterial(
-    DCgState *state,
-    size_t moduleCount,
-    DCgShaderModule *modules,
-    DCgMaterialOptions *options,
-    DCgMaterialCache *cache
-) {
-    DCgMaterial *material = malloc(sizeof(DCgMaterial));
+DCgMaterial *dcgNewMaterial(DCgState *state, size_t moduleCount, DCgShaderModule *modules, DCgMaterialOptions *options, DCgMaterialCache *cache) {
+	DCgMaterial *material = malloc(sizeof(DCgMaterial));
 	CreateLayout_(state, material, options);
 
-    VkPipelineVertexInputStateCreateInfo vertexInputInfo = {0};
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo = { 0 };
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertexInputInfo.vertexBindingDescriptionCount = (uint32_t)dcgiGetVertexBindings(state, options->vertexInputIndex, NULL);
 	dcgiGetVertexBindings(state, options->vertexInputIndex, &vertexInputInfo.pVertexBindingDescriptions);
 	vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)dcgiGetVertexAttributes(state, options->vertexInputIndex, NULL);
 	dcgiGetVertexAttributes(state, options->vertexInputIndex, &vertexInputInfo.pVertexAttributeDescriptions);
 
-	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {0};
+	VkPipelineInputAssemblyStateCreateInfo inputAssembly = { 0 };
 	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	inputAssembly.primitiveRestartEnable = VK_FALSE;
 
-	VkRect2D scissor = {0};
+	VkRect2D scissor = { 0 };
 	scissor.offset = (VkOffset2D){ options->scissorOffset[0], options->scissorOffset[1] };
 	scissor.extent = (VkExtent2D){ options->scissorExtent[0], options->scissorExtent[1] };
 
-	VkViewport viewport = {0};
+	VkViewport viewport = { 0 };
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
 	viewport.width = (float)options->viewportExtent[0];
@@ -52,14 +42,14 @@ DCgMaterial *dcgNewMaterial(
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
-	VkPipelineViewportStateCreateInfo viewportState = {0};
+	VkPipelineViewportStateCreateInfo viewportState = { 0 };
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewportState.viewportCount = 1;
 	viewportState.pViewports = &viewport;
 	viewportState.scissorCount = 1;
-	viewportState.pScissors = &scissor; 
+	viewportState.pScissors = &scissor;
 
-	VkPipelineRasterizationStateCreateInfo rasterizer = {0};
+	VkPipelineRasterizationStateCreateInfo rasterizer = { 0 };
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
 	rasterizer.rasterizerDiscardEnable = options->enableDiscard;
@@ -72,7 +62,7 @@ DCgMaterial *dcgNewMaterial(
 	rasterizer.depthBiasClamp = 0.0f;
 	rasterizer.depthBiasSlopeFactor = 0.0f;
 
-	VkPipelineMultisampleStateCreateInfo multisampling = {0};
+	VkPipelineMultisampleStateCreateInfo multisampling = { 0 };
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	multisampling.sampleShadingEnable = VK_FALSE;
 	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
@@ -81,7 +71,7 @@ DCgMaterial *dcgNewMaterial(
 	multisampling.alphaToCoverageEnable = VK_FALSE;
 	multisampling.alphaToOneEnable = VK_FALSE;
 
-	VkPipelineColorBlendAttachmentState colorBlendAttachment = {0};
+	VkPipelineColorBlendAttachmentState colorBlendAttachment = { 0 };
 	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 	colorBlendAttachment.blendEnable = VK_FALSE;
 	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
@@ -91,7 +81,7 @@ DCgMaterial *dcgNewMaterial(
 	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
 	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
-	VkPipelineColorBlendStateCreateInfo colorBlending = {0};
+	VkPipelineColorBlendStateCreateInfo colorBlending = { 0 };
 	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 	colorBlending.logicOpEnable = VK_FALSE;
 	colorBlending.logicOp = VK_LOGIC_OP_COPY;
@@ -102,12 +92,12 @@ DCgMaterial *dcgNewMaterial(
 	colorBlending.blendConstants[2] = 0.0f;
 	colorBlending.blendConstants[3] = 0.0f;
 
-	VkPipelineDynamicStateCreateInfo dynamicState = {0};
+	VkPipelineDynamicStateCreateInfo dynamicState = { 0 };
 	dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 	dynamicState.dynamicStateCount = 0;
 	dynamicState.pDynamicStates = NULL;
 
-	VkPipelineDepthStencilStateCreateInfo depthStencilState = {0};
+	VkPipelineDepthStencilStateCreateInfo depthStencilState = { 0 };
 	depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 	depthStencilState.depthTestEnable = options->enableDepthTest;
 	depthStencilState.depthWriteEnable = options->enableDepthWrite;
@@ -117,9 +107,8 @@ DCgMaterial *dcgNewMaterial(
 	depthStencilState.maxDepthBounds = options->maxDepthBound;
 	depthStencilState.stencilTestEnable = options->enableStencilTest;
 
-	VkPipelineShaderStageCreateInfo *shaderStages
-		= calloc(moduleCount, sizeof(VkPipelineShaderStageCreateInfo));
-	
+	VkPipelineShaderStageCreateInfo *shaderStages = calloc(moduleCount, sizeof(VkPipelineShaderStageCreateInfo));
+
 	for(size_t i = 0; i < moduleCount; ++i) {
 		shaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStages[i].module = modules[i].module;
@@ -127,7 +116,7 @@ DCgMaterial *dcgNewMaterial(
 		shaderStages[i].pName = modules[i].name;
 	}
 
-	VkGraphicsPipelineCreateInfo createInfo = {0};
+	VkGraphicsPipelineCreateInfo createInfo = { 0 };
 
 	createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	createInfo.stageCount = (uint32_t)moduleCount;
@@ -145,21 +134,18 @@ DCgMaterial *dcgNewMaterial(
 	createInfo.subpass = 0; // ?TODO: subpass
 	createInfo.basePipelineHandle = VK_NULL_HANDLE;
 	createInfo.basePipelineIndex = -1;
-	
-    if(vkCreateGraphicsPipelines(
-		state->device,
-		(VkPipelineCache)cache,
-		1, &createInfo,
-		state->allocator,
-		&material->pipeline
-	) != VK_SUCCESS) DCD_FATAL("Failed to create pipeline!");
+
+	DC_ASSERT(
+	  vkCreateGraphicsPipelines(state->device, (VkPipelineCache)cache, 1, &createInfo, state->allocator, &material->pipeline) == VK_SUCCESS,
+	  "Failed to create pipeline!"
+	);
 
 	free(shaderStages);
-    return material;
+	return material;
 }
 
 void dcgFreeMaterial(DCgState *state, DCgMaterial *material) {
-    DEBUGIF(material == NULL) {
+	DEBUGIF(material == NULL) {
 		DCD_MSGF(ERROR, "Tried to free NULL material.");
 		return;
 	}
@@ -167,26 +153,26 @@ void dcgFreeMaterial(DCgState *state, DCgMaterial *material) {
 	DEBUGIF(material->pipeline == VK_NULL_HANDLE) {
 		DCD_MSGF(ERROR, "Tried to destroy NULL pipeline object.");
 		return;
-	} else
-		vkDestroyPipeline(state->device, material->pipeline, state->allocator);
+	}
+	else vkDestroyPipeline(state->device, material->pipeline, state->allocator);
 
 	DEBUGIF(material->layout == VK_NULL_HANDLE) {
 		DCD_MSGF(ERROR, "Tried to destroy NULL pipeline layout object.");
 		return;
-	} else
-		vkDestroyPipelineLayout(state->device, material->layout, state->allocator);
+	}
+	else vkDestroyPipelineLayout(state->device, material->layout, state->allocator);
 
-    free(material);
+	free(material);
 }
 
 DCgMaterialCache *dcgGetMaterialCache(DCgState *state, DCgMaterial *material) {
-    // TODO: material/pipeline cache
-    
-    // VkPipelineCache cache;
-    // VkPipelineCacheCreateInfo createInfo = {0};
-    // createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-    // createInfo.flags
-    // vkCreatePipelineCache(state->device, &createInfo, NULL, &cache);
-    // vkGetPipelineCacheData(state->device, VkPipelineCache pipelineCache, size_t *pDataSize, void *pData)
-    return NULL;
+	// TODO: material/pipeline cache
+
+	// VkPipelineCache cache;
+	// VkPipelineCacheCreateInfo createInfo = {0};
+	// createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+	// createInfo.flags
+	// vkCreatePipelineCache(state->device, &createInfo, NULL, &cache);
+	// vkGetPipelineCacheData(state->device, VkPipelineCache pipelineCache, size_t *pDataSize, void *pData)
+	return NULL;
 }

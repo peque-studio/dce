@@ -1,0 +1,32 @@
+---
+ColumnLimit: '150'
+IndentCaseLabels: 'false'
+IndentWidth: 2
+TabWidth: 2
+ContinuationIndentWidth: 2
+SpacesInContainerLiterals: true
+UseTab: ForIndentation
+AllowShortIfStatementsOnASingleLine: true
+IndentCaseLabels: false
+SpaceInEmptyBlock: true
+SortIncludes: Never
+ReferenceAlignment: Right
+QualifierAlignment: Left
+PointerAlignment: Right
+IndentPPDirectives: AfterHash
+IndentAccessModifiers: false
+IncludeBlocks: Preserve
+EmptyLineBeforeAccessModifier: LogicalBlock
+Cpp11BracedListStyle: false
+AllowShortLambdasOnASingleLine: All
+AllowShortFunctionsOnASingleLine: All
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: true
+AllowShortBlocksOnASingleLine: Empty
+AlignOperands: DontAlign # AlignAfterOperator
+AlignEscapedNewlines: DontAlign
+AlignConsecutiveDeclarations: None
+AlignArrayOfStructures: Right
+AlignAfterOpenBracket: BlockIndent
+SpaceBeforeParens: Never
+BreakBeforeBinaryOperators: All

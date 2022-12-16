@@ -1,7 +1,14 @@
 *.o
 *.d
 dist/*
-bin/*
-out/*
+bin
+lib
+out
 
 *_scrot.png
+*cache*
+.cache
+.ninja_log
+compile_commands.json
+
+./dce

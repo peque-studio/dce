@@ -1,0 +1,26 @@
+
+## Debug
+build bin/dcore/debug/debug.o: cc dcore/debug/debug.c
+
+## Graphics
+build bin/dcore/graphics/commands.o: cc dcore/graphics/commands.c
+build bin/dcore/graphics/init.o: cc dcore/graphics/init.c
+# build bin/dcore/graphics/material.o: cc dcore/debug/debug.c
+build bin/dcore/graphics/run.o: cc dcore/graphics/run.c
+
+## Memory
+build bin/dcore/memory/arena.o: cc dcore/memory/arena.c
+build bin/dcore/memory/memory.o: cc dcore/memory/memory.c
+
+## Renderers/Basic
+build bin/dcore/renderers/basic.o: cc dcore/renderers/basic.c
+
+## Archive
+build lib/libdce.a: ar $
+  bin/dcore/debug/debug.o $
+  bin/dcore/graphics/commands.o $
+  bin/dcore/graphics/init.o $
+  bin/dcore/graphics/run.o $
+  bin/dcore/memory/arena.o $
+  bin/dcore/memory/memory.o $
+  bin/dcore/renderers/basic.o
