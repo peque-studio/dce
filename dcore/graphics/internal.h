@@ -4,77 +4,78 @@
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
-typedef struct { const char *name; bool enabled; } DCgiSuggestedExtension;
-typedef struct { const char *name; bool enabled; } DCgiSuggestedLayer;
+typedef struct {
+	const char *name;
+	bool enabled;
+} DCgiSuggestedExtension;
+typedef struct {
+	const char *name;
+	bool enabled;
+} DCgiSuggestedLayer;
 
 struct DCgState {
-    VkInstance instance;
-    VkPhysicalDevice physicalDevice;
-    VkDevice device;
-    VkSurfaceKHR surface;
-    VkSurfaceFormatKHR surfaceFormat;
+	VkInstance instance;
+	VkPhysicalDevice physicalDevice;
+	VkDevice device;
+	VkSurfaceKHR surface;
+	VkSurfaceFormatKHR surfaceFormat;
 
-    struct {
-        size_t count;
-        DCgiSuggestedExtension *extensions;
-    } suggestedExtensions;
+	struct {
+		size_t count;
+		DCgiSuggestedExtension *extensions;
+	} suggestedExtensions;
 
-    struct {
-        size_t count;
-        DCgiSuggestedLayer *layers;
-    } suggestedLayers;
+	struct {
+		size_t count;
+		DCgiSuggestedLayer *layers;
+	} suggestedLayers;
 
-    VkPresentModeKHR presentMode;
+	VkPresentModeKHR presentMode;
 
-    size_t renderPassCount;
-    VkRenderPass *renderPasses;
+	size_t renderPassCount;
+	VkRenderPass *renderPasses;
 
-    VkSwapchainKHR swapchain;
+	VkSwapchainKHR swapchain;
 
-    VkAllocationCallbacks *allocator;
+	VkAllocationCallbacks *allocator;
 
-    uint32_t graphicsQueueFamily, computeQueueFamily, presentQueueFamily;
+	uint32_t graphicsQueueFamily, computeQueueFamily, presentQueueFamily;
 
-    GLFWwindow *window;
+	GLFWwindow *window;
 
-    size_t pushConstantRangesCount;
-    struct {
-        size_t count;
-        VkPushConstantRange ranges[];
-    } *pushConstantRanges;
+	size_t pushConstantRangesCount;
+	struct {
+		size_t count;
+		VkPushConstantRange ranges[];
+	} * pushConstantRanges;
 
-    size_t descriptorSetLayoutsCount;
-    struct {
-        size_t count;
-        VkDescriptorSetLayout layouts[];
-    } *descriptorSetLayouts;
+	size_t descriptorSetLayoutsCount;
+	struct {
+		size_t count;
+		VkDescriptorSetLayout layouts[];
+	} * descriptorSetLayouts;
 
-    size_t vertexBindingsCount;
-    struct {
-        size_t count;
-        VkVertexInputBindingDescription bindings[];
-    } *vertexBindings;
+	size_t vertexBindingsCount;
+	struct {
+		size_t count;
+		VkVertexInputBindingDescription bindings[];
+	} * vertexBindings;
 
-    size_t vertexAttributesCount;
-    struct {
-        size_t count;
-        VkVertexInputAttributeDescription attributes[];
-    } *vertexAttributes;
+	size_t vertexAttributesCount;
+	struct {
+		size_t count;
+		VkVertexInputAttributeDescription attributes[];
+	} * vertexAttributes;
 };
 
 struct DCgMaterial {
-    VkPipeline pipeline;
-    VkPipelineLayout layout;
+	VkPipeline pipeline;
+	VkPipelineLayout layout;
 };
 
 VkRenderPass dcgiAddRenderPass(
-    DCgState *state,
-    size_t attachmentCount,
-    VkAttachmentDescription *attachments,
-    size_t subpassCount,
-    VkSubpassDescription *subpasses,
-	size_t dependencyCount,
-	VkSubpassDependency *dependencies
+  DCgState *state, size_t attachmentCount, VkAttachmentDescription *attachments, size_t subpassCount, VkSubpassDescription *subpasses,
+  size_t dependencyCount, VkSubpassDependency *dependencies
 );
 
 VkPushConstantRange *dcgiAddPushConstantRanges(DCgState *state, size_t count);
@@ -90,12 +91,12 @@ size_t dcgiGetVertexAttributes(DCgState *state, int index, const VkVertexInputAt
 VkQueue dcgiGetQueue(DCgState *state, uint32_t index);
 
 enum DCgiSuggestedExtensionIndex {
-    DCGI_SUGGESTED_EXTENSION_DEBUG_REPORT,
-    DCGI_SUGGESTED_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2,
+	DCGI_SUGGESTED_EXTENSION_DEBUG_REPORT,
+	DCGI_SUGGESTED_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2,
 };
 
 enum DCgiSuggestedLayerIndex {
-    DCGI_SUGGESTED_LAYER_VALIDATION,
+	DCGI_SUGGESTED_LAYER_VALIDATION,
 };
 
 void dcgiPrintGlfwErrors();

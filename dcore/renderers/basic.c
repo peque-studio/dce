@@ -4,106 +4,98 @@
 void dcgBasicRendererCreateInfo(DCgState *state) {
 	VkAttachmentDescription attachments[2] = {
 		(VkAttachmentDescription){
-			.format = state->surfaceFormat.format,
-			.flags = 0,
-			.samples = VK_SAMPLE_COUNT_1_BIT,
-			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-			.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-			.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-			.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-			.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-			.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		},
+		                          .format = state->surfaceFormat.format,
+		                          .flags = 0,
+		                          .samples = VK_SAMPLE_COUNT_1_BIT,
+		                          .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+		                          .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+		                          .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+		                          .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+		                          .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+		                          .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		                          },
 		(VkAttachmentDescription){
-			.format = VK_FORMAT_D32_SFLOAT, // TODO: find best format, this one may not be supported
-			.flags = 0,
-			.samples = VK_SAMPLE_COUNT_1_BIT,
-			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-			.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-			.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-			.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-			.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-			.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-		}
+		                          .format = VK_FORMAT_D32_SFLOAT, // TODO: find best format, this one may not be supported
+ .flags = 0,
+		                          .samples = VK_SAMPLE_COUNT_1_BIT,
+		                          .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+		                          .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+		                          .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+		                          .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+		                          .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+		                          .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+		                          }
 	};
-	
+
 	VkAttachmentReference attachmentReferences[2] = {
+		(VkAttachmentReference){.attachment = 0,     .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL },
 		(VkAttachmentReference){
-			.attachment = 0,
-			.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-		},
-		(VkAttachmentReference){
-			.attachment = 1,
-			.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-		}
+		                        .attachment = 1,
+		                        .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+		                        }
 	};
 
 	VkSubpassDescription subpasses[1] = {
-		(VkSubpassDescription){
-			.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-			.flags = 0,
-			.colorAttachmentCount = 1,
-			.pColorAttachments = &attachmentReferences[0],
-			.inputAttachmentCount = 0,
-			.pInputAttachments = NULL,
-			.preserveAttachmentCount = 0,
-			.pPreserveAttachments = NULL,
-			.pResolveAttachments = NULL,
-			.pDepthStencilAttachment = &attachmentReferences[1]
-		}
+		(VkSubpassDescription){.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+                           .flags = 0,
+                           .colorAttachmentCount = 1,
+                           .pColorAttachments = &attachmentReferences[0],
+                           .inputAttachmentCount = 0,
+                           .pInputAttachments = NULL,
+                           .preserveAttachmentCount = 0,
+                           .pPreserveAttachments = NULL,
+                           .pResolveAttachments = NULL,
+                           .pDepthStencilAttachment = &attachmentReferences[1]}
 	};
 
 	VkSubpassDependency dependencies[1] = {
-		(VkSubpassDependency){
-			.srcSubpass = VK_SUBPASS_EXTERNAL,
-			.dstSubpass = 0,
-			.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			.srcAccessMask = 0,
-			.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			.dependencyFlags = 0
-		}
+		(VkSubpassDependency){.srcSubpass = VK_SUBPASS_EXTERNAL,
+                          .dstSubpass = 0,
+                          .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                          .srcAccessMask = 0,
+                          .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                          .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                          .dependencyFlags = 0}
 	};
-	
+
 	dcgiAddRenderPass(state, 2, attachments, 1, subpasses, 1, dependencies);
 
 	VkDescriptorSetLayout *setLayouts = dcgiAddDescriptorSetLayouts(state, 2);
-	
+
 	VkDescriptorSetLayoutBinding setLayoutBindings[] = {
-		(VkDescriptorSetLayoutBinding){
-			.binding = 0,
-			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_ALL,
-			.pImmutableSamplers = NULL
-		},
-		(VkDescriptorSetLayoutBinding){
-			.binding = 0,
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_ALL,
-			.pImmutableSamplers = NULL
-		}
+		(VkDescriptorSetLayoutBinding){.binding = 0,
+                                   .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                   .descriptorCount = 1,
+                                   .stageFlags = VK_SHADER_STAGE_ALL,
+                                   .pImmutableSamplers = NULL},
+		(VkDescriptorSetLayoutBinding){.binding = 0,
+                                   .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                   .descriptorCount = 1,
+                                   .stageFlags = VK_SHADER_STAGE_ALL,
+                                   .pImmutableSamplers = NULL}
 	};
 
 	{
-		VkDescriptorSetLayoutCreateInfo createInfo = {0};
+		VkDescriptorSetLayoutCreateInfo createInfo = { 0 };
 		createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		createInfo.bindingCount = 1;
 		createInfo.pBindings = &setLayoutBindings[0];
-		DC_RASSERT(vkCreateDescriptorSetLayout(state->device, &createInfo, state->allocator, &setLayouts[0]) == VK_SUCCESS,
-			"Failed to create descriptor set layout #0");
+		DC_RASSERT(
+		  vkCreateDescriptorSetLayout(state->device, &createInfo, state->allocator, &setLayouts[0]) == VK_SUCCESS,
+		  "Failed to create descriptor set layout #0"
+		);
 	}
 
 	{
-		VkDescriptorSetLayoutCreateInfo createInfo = {0};
+		VkDescriptorSetLayoutCreateInfo createInfo = { 0 };
 		createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		createInfo.bindingCount = 1;
 		createInfo.pBindings = &setLayoutBindings[1];
-		DC_RASSERT(vkCreateDescriptorSetLayout(state->device, &createInfo, state->allocator, &setLayouts[1]) == VK_SUCCESS,
-			"Failed to create descriptor set layout #1");
+		DC_RASSERT(
+		  vkCreateDescriptorSetLayout(state->device, &createInfo, state->allocator, &setLayouts[1]) == VK_SUCCESS,
+		  "Failed to create descriptor set layout #1"
+		);
 	}
-
 
 	VkPushConstantRange *ranges = dcgiAddPushConstantRanges(state, DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_ENUM_MAX);
 	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_BASE].offset = 0;

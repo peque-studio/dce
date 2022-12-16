@@ -9,16 +9,13 @@
 
 // extensions that we might need.
 static const char *suggestedExtensions[] = {
-	[DCGI_SUGGESTED_EXTENSION_DEBUG_REPORT]
-		= "VK_EXT_debug_report",
-	[DCGI_SUGGESTED_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2]
-		= "VK_KHR_get_physical_device_properties2",
+	[DCGI_SUGGESTED_EXTENSION_DEBUG_REPORT] = "VK_EXT_debug_report",
+	[DCGI_SUGGESTED_EXTENSION_GET_PHYSICAL_DEVICE_PROPERTIES2] = "VK_KHR_get_physical_device_properties2",
 };
 
 // layers that we might need.
 static const char *suggestedLayers[] = {
-	[DCGI_SUGGESTED_LAYER_VALIDATION]
-		= "VK_LAYER_KHRONOS_validation",
+	[DCGI_SUGGESTED_LAYER_VALIDATION] = "VK_LAYER_KHRONOS_validation",
 };
 
 static void createInstance(DCgState *state, uint32_t appVersion, const char *appName) {
@@ -62,14 +59,12 @@ static void createInstance(DCgState *state, uint32_t appVersion, const char *app
 	// check if we have a matching suggestedExtension.
 	for(int i = 0; i < extensionPropertiesCount; ++i) {
 		for(int j = 0; j < state->suggestedExtensions.count; ++j) {
-			if(!state->suggestedExtensions.extensions[j].enabled
-			&& strcmp(extensionProperties[i].extensionName, state->suggestedExtensions.extensions[j].name) == 0
-			) {
+			if(!state->suggestedExtensions.extensions[j].enabled && strcmp(extensionProperties[i].extensionName, state->suggestedExtensions.extensions[j].name) == 0) {
 				enabledExtensions[enabledExtensionCount++] = extensionProperties[i].extensionName;
 				state->suggestedExtensions.extensions[j].enabled = true;
 				break;
 			}
-		} 
+		}
 	}
 
 	for(int i = 0; i < state->suggestedExtensions.count; ++i) {
@@ -91,24 +86,19 @@ static void createInstance(DCgState *state, uint32_t appVersion, const char *app
 	vkEnumerateInstanceLayerProperties(&layerPropertiesCount, layerProperties);
 
 	for(int j = 0; j < state->suggestedLayers.count; ++j) {
-		DCD_DEBUG("Suggested layer #%d, '%s', enabled: %s",
-			j, state->suggestedLayers.layers[j].name, state->suggestedLayers.layers[j].enabled ? "true" : "false");
+		DCD_DEBUG(
+		  "Suggested layer #%d, '%s', enabled: %s", j, state->suggestedLayers.layers[j].name, state->suggestedLayers.layers[j].enabled ? "true" : "false"
+		);
 	}
 
 	// check if we have a matching suggestedLayers.
 	for(int i = 0; i < layerPropertiesCount; ++i) {
 		for(int j = 0; j < state->suggestedLayers.count; ++j) {
 			DCD_DEBUG(
-				"comparing layers: #%d '%s' and suggested #%d '%s', is already enabled: %s",
-				i,
-				layerProperties[i].layerName,
-				j,
-				state->suggestedLayers.layers[j].name,
-				(state->suggestedLayers.layers[j].enabled ? "true" : "false")
+			  "comparing layers: #%d '%s' and suggested #%d '%s', is already enabled: %s", i, layerProperties[i].layerName, j,
+			  state->suggestedLayers.layers[j].name, (state->suggestedLayers.layers[j].enabled ? "true" : "false")
 			);
-			if(!state->suggestedLayers.layers[j].enabled
-			&& strcmp(layerProperties[i].layerName, state->suggestedLayers.layers[j].name) == 0
-			) {
+			if(!state->suggestedLayers.layers[j].enabled && strcmp(layerProperties[i].layerName, state->suggestedLayers.layers[j].name) == 0) {
 				DCD_DEBUG(" `- enabling");
 				enabledLayers[enabledLayerCount++] = layerProperties[i].layerName;
 				state->suggestedLayers.layers[j].enabled = true;
@@ -136,29 +126,24 @@ static void createInstance(DCgState *state, uint32_t appVersion, const char *app
 		DCD_MSGF(INFO, "Layer: '%s'.", enabledLayers[i]);
 	}
 
-	VkApplicationInfo applicationInfo = {0};
+	VkApplicationInfo applicationInfo = { 0 };
 	applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	applicationInfo.applicationVersion = appVersion;
 	applicationInfo.pApplicationName = appName;
-	applicationInfo.engineVersion = VK_MAKE_VERSION(
-		DCE_VERSION_MAJOR,
-		DCE_VERSION_MINOR,
-		DCE_VERSION_PATCH
-	);
+	applicationInfo.engineVersion = VK_MAKE_VERSION(DCE_VERSION_MAJOR, DCE_VERSION_MINOR, DCE_VERSION_PATCH);
 	applicationInfo.pEngineName = "DCE";
 	applicationInfo.apiVersion = VK_API_VERSION_1_0;
 
-	VkInstanceCreateInfo createInfo = {0};
+	VkInstanceCreateInfo createInfo = { 0 };
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.pApplicationInfo = &applicationInfo;
 	createInfo.enabledExtensionCount = enabledExtensionCount;
 	createInfo.ppEnabledExtensionNames = enabledExtensions;
 	createInfo.enabledLayerCount = enabledLayerCount;
 	createInfo.ppEnabledLayerNames = enabledLayers;
-	
-	DC_RASSERT(vkCreateInstance(&createInfo, state->allocator, &state->instance) == VK_SUCCESS,
-		"Failed to create Vulkan instance");
-	
+
+	DC_RASSERT(vkCreateInstance(&createInfo, state->allocator, &state->instance) == VK_SUCCESS, "Failed to create Vulkan instance");
+
 	dcmemDeallocate(enabledExtensions);
 	dcmemDeallocate(enabledLayers);
 	dcmemDeallocate(extensionProperties);
@@ -166,21 +151,9 @@ static void createInstance(DCgState *state, uint32_t appVersion, const char *app
 	DCD_MSGF(DEBUG, "Done creating instance...");
 }
 
-static const char *physicalDeviceTypeNames[] = {
-	"Other",
-	"Integrated GPU",
-	"Discrete GPU",
-	"Virtual GPU",
-	"CPU"
-};
+static const char *physicalDeviceTypeNames[] = { "Other", "Integrated GPU", "Discrete GPU", "Virtual GPU", "CPU" };
 
-static size_t physicalDeviceTypeScores[] = {
-	0,
-	5000,
-	10000,
-	7500,
-	2500
-};
+static size_t physicalDeviceTypeScores[] = { 0, 5000, 10000, 7500, 2500 };
 
 typedef struct QueueFamilies {
 	uint32_t graphics, compute, present;
@@ -195,14 +168,11 @@ static void findQueueFamilies(DCgState *state, VkPhysicalDevice physicalDevice, 
 	VkQueueFamilyProperties *queueFamilies = dcmemAllocate(sizeof(VkQueueFamilyProperties) * queueFamilyCount);
 	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies);
 	for(uint32_t i = 0; i < queueFamilyCount; ++i) {
-		if(queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-			families->graphics = i;
-		if(queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT)
-			families->compute = i;
+		if(queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) families->graphics = i;
+		if(queueFamilies[i].queueFlags & VK_QUEUE_COMPUTE_BIT) families->compute = i;
 		VkBool32 supported;
 		vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, state->surface, &supported);
-		if(supported)
-			families->present = i;
+		if(supported) families->present = i;
 	}
 
 	dcmemDeallocate(queueFamilies);
@@ -225,7 +195,7 @@ static bool checkDeviceExtensionSupport(VkPhysicalDevice physicalDevice, size_t 
 			}
 		}
 	}
-	
+
 	dcmemDeallocate(properties);
 	return notFound == 0;
 }
@@ -240,19 +210,12 @@ static void selectPhysicalDevice(DCgState *state) {
 	for(int i = 0; i < deviceCount; ++i) {
 		VkPhysicalDeviceProperties properties;
 		vkGetPhysicalDeviceProperties(devices[i], &properties);
-		DCD_MSGF(INFO, "Device '%s', %s",
-			properties.deviceName,
-			physicalDeviceTypeNames[properties.deviceType]
-		);
-	
-		size_t score = physicalDeviceTypeScores[properties.deviceType]
-			+ properties.limits.maxDescriptorSetSamplers * 100
-			+ properties.limits.maxBoundDescriptorSets * 100
-			+ properties.limits.maxDescriptorSetUniformBuffers * 100
-			+ properties.limits.maxUniformBufferRange
-			+ (properties.limits.maxFramebufferWidth / 100)
-			* (properties.limits.maxFramebufferHeight / 100);
-		
+		DCD_MSGF(INFO, "Device '%s', %s", properties.deviceName, physicalDeviceTypeNames[properties.deviceType]);
+
+		size_t score = physicalDeviceTypeScores[properties.deviceType] + properties.limits.maxDescriptorSetSamplers * 100
+		  + properties.limits.maxBoundDescriptorSets * 100 + properties.limits.maxDescriptorSetUniformBuffers * 100
+		  + properties.limits.maxUniformBufferRange + (properties.limits.maxFramebufferWidth / 100) * (properties.limits.maxFramebufferHeight / 100);
+
 		QueueFamilies queueFamilies;
 		findQueueFamilies(state, devices[i], &queueFamilies);
 
@@ -273,7 +236,7 @@ static void selectPhysicalDevice(DCgState *state) {
 			DCD_FATAL("Required extensions not supported.");
 			score = 0;
 		}
-		
+
 		DCD_MSGF(INFO, "Score: %zu", score);
 		if(score >= maxScrore) {
 			state->computeQueueFamily = queueFamilies.compute;
@@ -291,14 +254,16 @@ static void selectPhysicalDevice(DCgState *state) {
 
 static void createSurface(DCgState *state) {
 	DCD_DEBUG("Creating surface...");
-	DC_RASSERT(glfwCreateWindowSurface(state->instance, state->window, state->allocator, &state->surface) == VK_SUCCESS,
-		"Failed to create window surface!");
+	DC_RASSERT(
+	  glfwCreateWindowSurface(state->instance, state->window, state->allocator, &state->surface) == VK_SUCCESS, "Failed to create window surface!"
+	);
 	DCD_DEBUG("Done creating surface");
 }
 
 static size_t addUniqueQueueFamily(uint32_t *families, size_t last, uint32_t new) {
 	if(new == UINT32_MAX) return last; // don't add non-existent families.
-	for(size_t i = 0; i < last + 1; ++i) if(new == families[i]) return last;
+	for(size_t i = 0; i < last + 1; ++i)
+		if(new == families[i]) return last;
 	families[last] = new;
 	return last + 1;
 }
@@ -321,7 +286,7 @@ static void createLogicalDevice(DCgState *state) {
 		queues[i].pQueuePriorities = &queuePriority;
 	}
 
-	VkPhysicalDeviceFeatures features = {0};
+	VkPhysicalDeviceFeatures features = { 0 };
 
 	uint32_t propertiesCount;
 	vkEnumerateDeviceExtensionProperties(state->physicalDevice, NULL, &propertiesCount, NULL);
@@ -341,7 +306,7 @@ static void createLogicalDevice(DCgState *state) {
 		DCD_DEBUG("enabled extension: %s", enabledExtensions[i]);
 	}
 
-	VkDeviceCreateInfo createInfo = {0};
+	VkDeviceCreateInfo createInfo = { 0 };
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	createInfo.pQueueCreateInfos = queues;
 	createInfo.queueCreateInfoCount = queueFamilyCount;
@@ -349,8 +314,7 @@ static void createLogicalDevice(DCgState *state) {
 	createInfo.ppEnabledExtensionNames = enabledExtensions;
 	createInfo.pEnabledFeatures = &features;
 
-	DC_RASSERT(vkCreateDevice(state->physicalDevice, &createInfo, state->allocator, &state->device) == VK_SUCCESS,
-		"Failed to create logical device");
+	DC_RASSERT(vkCreateDevice(state->physicalDevice, &createInfo, state->allocator, &state->device) == VK_SUCCESS, "Failed to create logical device");
 
 	dcmemDeallocate(properties);
 	dcmemDeallocate(enabledExtensions);
@@ -361,7 +325,7 @@ static void createLogicalDevice(DCgState *state) {
 
 VkQueue dcgiGetQueue(DCgState *state, uint32_t index) {
 	DC_ASSERT(index < 3, "Queue family index too big!");
-	static VkQueue queues[3] = { 0 }; // TODO: this is the maximum possible number of queues 
+	static VkQueue queues[3] = { 0 }; // TODO: this is the maximum possible number of queues
 	if(queues[index] != NULL) return queues[index];
 	vkGetDeviceQueue(state->device, index, 0, &queues[index]);
 	return queues[index];
@@ -394,8 +358,7 @@ static void selectSurfaceFormat(DCgState *state) {
 	VkSurfaceFormatKHR *surfaceFormats = dcmemAllocate(sizeof(VkSurfaceFormatKHR) * surfaceFormatCount);
 	vkGetPhysicalDeviceSurfaceFormatsKHR(state->physicalDevice, state->surface, &surfaceFormatCount, surfaceFormats);
 	for(uint32_t i = 0; i < surfaceFormatCount; ++i) {
-		if(surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB
-		&& surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+		if(surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_SRGB && surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
 			state->surfaceFormat = surfaceFormats[i];
 			dcmemDeallocate(surfaceFormats);
 			return;
@@ -411,18 +374,17 @@ static void createSwapchain(DCgState *state) {
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(state->physicalDevice, state->surface, &capabilities);
 
 	uint32_t imageCount = capabilities.minImageCount + 1;
-	if(capabilities.maxImageCount > 0
-	&& imageCount > capabilities.maxImageCount) {
+	if(capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
 		imageCount = capabilities.maxImageCount;
 	}
-	
+
 	VkExtent2D extent;
-	glfwGetFramebufferSize(state->window, (int*)&extent.width, (int*)&extent.height);
+	glfwGetFramebufferSize(state->window, (int *)&extent.width, (int *)&extent.height);
 
 	selectSurfaceFormat(state);
 	selectPresentMode(state);
 
-	VkSwapchainCreateInfoKHR createInfo = {0};
+	VkSwapchainCreateInfoKHR createInfo = { 0 };
 	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 	createInfo.surface = state->surface;
 	createInfo.minImageCount = imageCount;
@@ -449,8 +411,7 @@ static void createSwapchain(DCgState *state) {
 		createInfo.pQueueFamilyIndices = NULL;
 	}
 
-	DC_RASSERT(vkCreateSwapchainKHR(state->device, &createInfo, state->allocator, &state->swapchain) == VK_SUCCESS,
-		"Failed to create swapchain");
+	DC_RASSERT(vkCreateSwapchainKHR(state->device, &createInfo, state->allocator, &state->swapchain) == VK_SUCCESS, "Failed to create swapchain");
 }
 
 DCgState *dcgNewState() {
@@ -468,13 +429,11 @@ DCgState *dcgNewState() {
 	return state;
 }
 
-void dcgFreeState(DCgState *state) {
-	dcmemDeallocate(state);
-}
+void dcgFreeState(DCgState *state) { dcmemDeallocate(state); }
 
 void dcgInit(DCgState *state, uint32_t appVersion, const char *appName) {
 	if(!glfwInit()) dcgiPrintGlfwErrors();
-	
+
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	state->window = glfwCreateWindow(640, 480, appName, NULL, NULL);
 	if(state->window == NULL) dcgiPrintGlfwErrors();
@@ -496,7 +455,8 @@ void dcgDeinit(DCgState *state) {
 		for(size_t i = 0; i < state->renderPassCount; ++i)
 			if(state->renderPasses[i] != VK_NULL_HANDLE)
 				vkDestroyRenderPass(state->device, state->renderPasses[i], state->allocator);
-			else DCD_WARNING("state->renderPasses[%zu] == VK_NULL_HANDLE", i);
+			else
+				DCD_WARNING("state->renderPasses[%zu] == VK_NULL_HANDLE", i);
 		dcmemDeallocate(state->renderPasses);
 	}
 
@@ -506,7 +466,8 @@ void dcgDeinit(DCgState *state) {
 			for(size_t j = 0; j < state->descriptorSetLayouts[i].count; ++j) {
 				if(state->descriptorSetLayouts[i].layouts[j] != VK_NULL_HANDLE)
 					vkDestroyDescriptorSetLayout(state->device, state->descriptorSetLayouts[i].layouts[j], state->allocator);
-				else DCD_WARNING("state->descriptorSetLayouts[%zu].layouts[%zu] == VK_NULL_HANDLE", i, j);
+				else
+					DCD_WARNING("state->descriptorSetLayouts[%zu].layouts[%zu] == VK_NULL_HANDLE", i, j);
 			}
 		dcmemDeallocate(state->descriptorSetLayouts);
 	}
@@ -572,30 +533,22 @@ VkRenderPass dcgiGetRenderPass(DCgState *state, size_t index) {
 	return state->renderPasses[index];
 }
 
-
 VkPushConstantRange *dcgiAddPushConstantRanges(DCgState *state, size_t count) {
 	if(state->pushConstantRangesCount == 0) {
-		state->pushConstantRanges = dcmemAllocate(
-			sizeof(*state->pushConstantRanges) +
-			sizeof(VkPushConstantRange) * count
-		);
+		state->pushConstantRanges = dcmemAllocate(sizeof(*state->pushConstantRanges) + sizeof(VkPushConstantRange) * count);
 		state->pushConstantRangesCount += 1;
 	} else {
 		/* due to each element in the array being a different size, we manually
 		   compute the size of the array. */
-		
+
 		size_t totalSize = 0;
-		for(size_t i = 0; i < state->pushConstantRangesCount; ++i) { 
+		for(size_t i = 0; i < state->pushConstantRangesCount; ++i) {
 			totalSize += sizeof(state->pushConstantRanges[i]);
 			totalSize += state->pushConstantRanges[i].count * sizeof(VkPushConstantRange);
 		}
 
-		state->pushConstantRanges = dcmemReallocate(
-			state->pushConstantRanges,
-			totalSize +
-			sizeof(*state->pushConstantRanges) +
-			sizeof(VkPushConstantRange) * count
-		);
+		state->pushConstantRanges
+		  = dcmemReallocate(state->pushConstantRanges, totalSize + sizeof(*state->pushConstantRanges) + sizeof(VkPushConstantRange) * count);
 	}
 
 	state->pushConstantRanges[state->pushConstantRangesCount - 1].count = count;
@@ -604,27 +557,20 @@ VkPushConstantRange *dcgiAddPushConstantRanges(DCgState *state, size_t count) {
 
 VkDescriptorSetLayout *dcgiAddDescriptorSetLayouts(DCgState *state, size_t count) {
 	if(state->descriptorSetLayoutsCount == 0) {
-		state->descriptorSetLayouts = dcmemAllocate(
-			sizeof(*state->descriptorSetLayouts) +
-			sizeof(VkDescriptorSetLayout) * count
-		);
+		state->descriptorSetLayouts = dcmemAllocate(sizeof(*state->descriptorSetLayouts) + sizeof(VkDescriptorSetLayout) * count);
 		state->descriptorSetLayoutsCount += 1;
 	} else {
 		/* due to each element in the array being a different size, we manually
 		   compute the size of the array. */
-		
+
 		size_t totalSize = 0;
-		for(size_t i = 0; i < state->descriptorSetLayoutsCount; ++i) { 
+		for(size_t i = 0; i < state->descriptorSetLayoutsCount; ++i) {
 			totalSize += sizeof(state->descriptorSetLayouts[i]);
 			totalSize += state->descriptorSetLayouts[i].count * sizeof(VkDescriptorSetLayout);
 		}
 
-		state->descriptorSetLayouts = dcmemReallocate(
-			state->descriptorSetLayouts,
-			totalSize +
-			sizeof(*state->descriptorSetLayouts) +
-			sizeof(VkDescriptorSetLayout) * count
-		);
+		state->descriptorSetLayouts
+		  = dcmemReallocate(state->descriptorSetLayouts, totalSize + sizeof(*state->descriptorSetLayouts) + sizeof(VkDescriptorSetLayout) * count);
 	}
 
 	state->descriptorSetLayouts[state->descriptorSetLayoutsCount - 1].count = count;
@@ -633,27 +579,20 @@ VkDescriptorSetLayout *dcgiAddDescriptorSetLayouts(DCgState *state, size_t count
 
 VkVertexInputBindingDescription *dcgiAddVertexBindings(DCgState *state, size_t count) {
 	if(state->vertexBindingsCount == 0) {
-		state->vertexBindings = dcmemAllocate(
-			sizeof(*state->vertexBindings) +
-			sizeof(VkVertexInputBindingDescription) * count
-		);
+		state->vertexBindings = dcmemAllocate(sizeof(*state->vertexBindings) + sizeof(VkVertexInputBindingDescription) * count);
 		state->vertexBindingsCount += 1;
 	} else {
 		/* due to each element in the array being a different size, we manually
 		   compute the size of the array. */
-		
+
 		size_t totalSize = 0;
-		for(size_t i = 0; i < state->vertexBindingsCount; ++i) { 
+		for(size_t i = 0; i < state->vertexBindingsCount; ++i) {
 			totalSize += sizeof(state->vertexBindings[i]);
 			totalSize += state->vertexBindings[i].count * sizeof(VkVertexInputBindingDescription);
 		}
 
-		state->vertexBindings = dcmemReallocate(
-			state->vertexBindings,
-			totalSize +
-			sizeof(*state->vertexBindings) +
-			sizeof(VkVertexInputBindingDescription) * count
-		);
+		state->vertexBindings
+		  = dcmemReallocate(state->vertexBindings, totalSize + sizeof(*state->vertexBindings) + sizeof(VkVertexInputBindingDescription) * count);
 	}
 
 	state->vertexBindings[state->vertexBindingsCount - 1].count = count;
@@ -662,27 +601,20 @@ VkVertexInputBindingDescription *dcgiAddVertexBindings(DCgState *state, size_t c
 
 VkVertexInputAttributeDescription *dcgiAddVertexAttributes(DCgState *state, size_t count) {
 	if(state->vertexAttributesCount == 0) {
-		state->vertexAttributes = dcmemAllocate(
-			sizeof(*state->vertexAttributes) +
-			sizeof(VkVertexInputAttributeDescription) * count
-		);
+		state->vertexAttributes = dcmemAllocate(sizeof(*state->vertexAttributes) + sizeof(VkVertexInputAttributeDescription) * count);
 		state->vertexAttributesCount += 1;
 	} else {
 		/* due to each element in the array being a different size, we manually
 		   compute the size of the array. */
-		
+
 		size_t totalSize = 0;
-		for(size_t i = 0; i < state->vertexAttributesCount; ++i) { 
+		for(size_t i = 0; i < state->vertexAttributesCount; ++i) {
 			totalSize += sizeof(state->vertexAttributes[i]);
 			totalSize += state->vertexAttributes[i].count * sizeof(VkVertexInputAttributeDescription);
 		}
 
-		state->vertexAttributes = dcmemReallocate(
-			state->vertexAttributes,
-			totalSize +
-			sizeof(*state->vertexAttributes) +
-			sizeof(VkVertexInputAttributeDescription) * count
-		);
+		state->vertexAttributes
+		  = dcmemReallocate(state->vertexAttributes, totalSize + sizeof(*state->vertexAttributes) + sizeof(VkVertexInputAttributeDescription) * count);
 	}
 
 	state->vertexAttributes[state->vertexAttributesCount - 1].count = count;
@@ -690,15 +622,10 @@ VkVertexInputAttributeDescription *dcgiAddVertexAttributes(DCgState *state, size
 }
 
 VkRenderPass dcgiAddRenderPass(
-	DCgState *state,
-	size_t attachmentCount,
-	VkAttachmentDescription *attachments,
-	size_t subpassCount,
-	VkSubpassDescription *subpasses,
-	size_t dependencyCount,
-	VkSubpassDependency *dependencies
+  DCgState *state, size_t attachmentCount, VkAttachmentDescription *attachments, size_t subpassCount, VkSubpassDescription *subpasses,
+  size_t dependencyCount, VkSubpassDependency *dependencies
 ) {
-	VkRenderPassCreateInfo createInfo = {0};
+	VkRenderPassCreateInfo createInfo = { 0 };
 	createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	createInfo.subpassCount = subpassCount;
 	createInfo.pSubpasses = subpasses;
@@ -710,16 +637,13 @@ VkRenderPass dcgiAddRenderPass(
 		state->renderPassCount = 1;
 		state->renderPasses = dcmemAllocate(sizeof(VkRenderPass));
 	} else {
-		state->renderPasses = dcmemReallocate(
-			state->renderPasses,
-			sizeof(VkRenderPass) * ++state->renderPassCount
-		);
+		state->renderPasses = dcmemReallocate(state->renderPasses, sizeof(VkRenderPass) * ++state->renderPassCount);
 	}
 
-	DC_RVASSERT(vkCreateRenderPass(
-		state->device, &createInfo, state->allocator,
-		&state->renderPasses[state->renderPassCount - 1]
-	) == VK_SUCCESS, "Failed to create render pass!", 0);
+	DC_RVASSERT(
+	  vkCreateRenderPass(state->device, &createInfo, state->allocator, &state->renderPasses[state->renderPassCount - 1]) == VK_SUCCESS,
+	  "Failed to create render pass!", 0
+	);
 
 	return state->renderPasses[state->renderPassCount - 1];
 }

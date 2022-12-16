@@ -1,36 +1,36 @@
 #ifndef DCORE_DEBUG_H
 #define DCORE_DEBUG_H
 #include <stddef.h> // size_t, can't include dcore/common.h since it includes this header.
-#include <stdio.h> // FILE*
+#include <stdio.h>  // FILE*
 
 void dcdInit();
 void dcdDeInit();
 
 typedef enum DCdMsgType {
-    DCD_MSG_TYPE_DEBUG,
-    DCD_MSG_TYPE_INFO,
-    DCD_MSG_TYPE_WARNING,
-    DCD_MSG_TYPE_ERROR,
-    DCD_MSG_TYPE_FATAL,
-    DCD_MSG_TYPE_SUCCESS,
+	DCD_MSG_TYPE_DEBUG,
+	DCD_MSG_TYPE_INFO,
+	DCD_MSG_TYPE_WARNING,
+	DCD_MSG_TYPE_ERROR,
+	DCD_MSG_TYPE_FATAL,
+	DCD_MSG_TYPE_SUCCESS,
 } DCdMsgType;
 
 typedef struct DCdMsgStats {
-    size_t total;
-    unsigned int debug;
-    unsigned int info;
-    unsigned int warning;
-    unsigned int error;
-    unsigned int fatal;
-    unsigned int success;
+	size_t total;
+	unsigned int debug;
+	unsigned int info;
+	unsigned int warning;
+	unsigned int error;
+	unsigned int fatal;
+	unsigned int success;
 } DCdMsgStats;
 
 typedef struct DCdContext {
-    const char *name;
-    DCdMsgStats stats;
+	const char *name;
+	DCdMsgStats stats;
 } DCdContext;
 
-typedef void(*DCdFatalHandler)();
+typedef void (*DCdFatalHandler)();
 
 void dcdSetFatalHandler(DCdFatalHandler handler);
 DCdFatalHandler dcdGetFatalHandler();
