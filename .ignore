@@ -4,4 +4,6 @@ bin
 .cache
 *.ninja
 .ninja_log
+run-clang-format.py
+format.sh
 LICENSE
