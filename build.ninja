@@ -1,12 +1,12 @@
 debug = -g
-cflags = -std=c17 -Wall -DDC_DEBUG -I. $debug
+cflags = -std=c17 -Wall -DDC_DEBUG -I. $debug -fsanitize=address -fno-omit-frame-pointer
 
 rule cc
   command = clang -c $in -o $out $cflags -MD -MF $out.d -fdiagnostics-color
   depfile = $out.d
 
 rule ld
-  command = clang $in -o $out -lglfw -lvulkan
+  command = clang $in -o $out -lglfw -lvulkan -fsanitize=address -g
 
 rule ar
   command = ar rc $out $in

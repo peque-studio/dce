@@ -104,6 +104,7 @@ void dcgBasicRendererCreateInfo(DCgState *state) {
 			"Failed to create descriptor set layout #1");
 	}
 
+
 	VkPushConstantRange *ranges = dcgiAddPushConstantRanges(state, DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_ENUM_MAX);
 	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_BASE].offset = 0;
 	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_BASE].size = sizeof(DCgBasicRendererUniformBuffer);
@@ -130,6 +131,6 @@ void dcgBasicRendererCreateInfo(DCgState *state) {
 
 	VkVertexInputBindingDescription *bindings = dcgiAddVertexBindings(state, 1);
 	bindings[0].binding = 0;
-	bindings[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-	bindings[2].stride = sizeof(DCgBasicRendererVertex);
+	bindings[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	bindings[0].stride = sizeof(DCgBasicRendererVertex);
 }

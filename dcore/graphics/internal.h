@@ -4,12 +4,25 @@
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
+typedef struct { const char *name; bool enabled; } DCgiSuggestedExtension;
+typedef struct { const char *name; bool enabled; } DCgiSuggestedLayer;
+
 struct DCgState {
     VkInstance instance;
     VkPhysicalDevice physicalDevice;
     VkDevice device;
     VkSurfaceKHR surface;
     VkSurfaceFormatKHR surfaceFormat;
+
+    struct {
+        size_t count;
+        DCgiSuggestedExtension *extensions;
+    } suggestedExtensions;
+
+    struct {
+        size_t count;
+        DCgiSuggestedLayer *layers;
+    } suggestedLayers;
 
     VkPresentModeKHR presentMode;
 
@@ -75,12 +88,6 @@ size_t dcgiGetSetLayouts(DCgState *state, int index, const VkDescriptorSetLayout
 size_t dcgiGetVertexBindings(DCgState *state, int index, const VkVertexInputBindingDescription **descriptions);
 size_t dcgiGetVertexAttributes(DCgState *state, int index, const VkVertexInputAttributeDescription **descriptions);
 VkQueue dcgiGetQueue(DCgState *state, uint32_t index);
-
-typedef struct { const char *name; bool available; } DCgiSuggestedExtension;
-typedef struct { const char *name; bool available; } DCgiSuggestedLayer;
-
-extern DCgiSuggestedExtension dcgiSuggestedExtensions[]; // extensions that we might need.
-extern DCgiSuggestedLayer dcgiSuggestedLayers[]; // layers that we might need.
 
 enum DCgiSuggestedExtensionIndex {
     DCGI_SUGGESTED_EXTENSION_DEBUG_REPORT,

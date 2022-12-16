@@ -1,0 +1,6 @@
+---
+ColumnLimit: '120'
+IndentCaseLabels: 'false'
+IndentWidth: '2'
+SpacesInContainerLiterals: 'true'
+UseTab: ForIndentation
