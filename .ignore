@@ -7,3 +7,4 @@ bin
 run-clang-format.py
 format.sh
 LICENSE
+docs/*

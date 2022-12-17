@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 	struct Test {
 		DCtTest *test;
 		bool failed;
-	} *testResults = malloc(sizeof(struct Test) * testCount);
+	} *testResults = dcmemAllocate(sizeof(struct Test) * testCount);
 
 	size_t failedTests = 0;
 
@@ -85,6 +85,7 @@ int main(int argc, char **argv) {
 		DCD_POP_CONTEXT();
 	}
 
+	dcmemDeallocate(tests);
 	dcdDeInit();
 	return exitCode;
 }
