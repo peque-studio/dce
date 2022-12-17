@@ -1,9 +1,24 @@
 #include <dcore/common.h>
 #include <dcore/debug.h>
+#include <string.h>
 #include <tests/test.h>
 #include <stdlib.h>
 
 void fatalHandler() { }
+
+static void showHelp(int argc, char **argv) {
+	printf(
+	  "usage: %s [options]\n"
+	  "runs all tests bundled.\n"
+	  "options:\n"
+	  "  -h, --help show this help message\n"
+	  "  -s         stop after first test fail\n"
+	  "  -q         don't show any output from tests\n"
+	  "  -v         show additional output (verbose)\n"
+	  "  -n         don't show summary\n",
+	  argv[0]
+	);
+}
 
 int main(int argc, char **argv) {
 	struct {
@@ -15,12 +30,20 @@ int main(int argc, char **argv) {
 
 	for(int i = 1; i < argc; ++i) {
 		if(argv[i][0] == '-') {
+			if(argv[i][1] == '-') {
+				if(strcmp(argv[i] + 2, "help") == 0) {
+					showHelp(argc, argv);
+					return 0;
+				}
+			}
+
 			for(int j = 1; argv[i][j]; ++j)
 				switch(argv[i][j]) {
 				case 's': options.stopAtFirstFail = true; break;
 				case 'q': options.quiet = true; break;
 				case 'v': options.verbose = true; break;
 				case 'n': options.noSummary = true; break;
+				case 'h': showHelp(argc, argv); return 0;
 				}
 		}
 	}
@@ -85,7 +108,7 @@ int main(int argc, char **argv) {
 		DCD_POP_CONTEXT();
 	}
 
-	dcmemDeallocate(tests);
+	dcmemDeallocate(testResults);
 	dcdDeInit();
 	return exitCode;
 }
