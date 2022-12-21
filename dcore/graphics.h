@@ -38,6 +38,8 @@ void dcgClose(DCgState *state);
 
 /** Retries the position of the mouse relative to the window. */
 void dcgGetMousePosition(DCgState *state, DCmVector2i mousePosition);
+
+/** Updates the window. (polls for new events) */
 void dcgUpdate(DCgState *state);
 
 typedef enum DCgQueueFamilyType {
@@ -48,12 +50,23 @@ typedef enum DCgQueueFamilyType {
 DCgCmdPool *dcgNewCmdPool(DCgState *s, DCgCmdPoolType type);
 void dcgFreeCmdPool(DCgState *s, DCgCmdPool *pool);
 
+/** Creates a new command buffer */
 DCgCmdBuffer *dcgGetNewCmdBuffer(DCgState *s, DCgCmdPool *pool);
+
+/** Begin command */
 void dcgCmdBegin(DCgState *s, DCgCmdBuffer *cmds);
+/** Binds a vertex buffer */
 void dcgCmdBindVertexBuf(DCgState *s, DCgCmdBuffer *cmds, DCgVertexBuffer *vbuf);
+/** Binds an index buffer */
 void dcgCmdBindIndexBuf(DCgState *s, DCgCmdBuffer *cmds, DCgIndexBuffer *ibuf);
+/** Binds a material (pipelines + stuff) */
 void dcgCmdBindMat(DCgState *s, DCgCmdBuffer *cmds, DCgMaterial *mat);
+/** Draws some instances with the specified
+ * number indices from the bound vertex/index buffers.
+ * @param indices number of indices to draw per instance.
+ * @param instances number of instances to draw. */
 void dcgCmdDraw(DCgState *s, DCgCmdBuffer *cmds, size_t indices, size_t instances);
+/** Submit a command buffer into a queue. */
 void dcgSubmit(DCgState *s, DCgCmdBuffer *cmds, int queue);
 
 typedef enum DCgPipelineStage {

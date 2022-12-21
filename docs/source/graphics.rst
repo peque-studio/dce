@@ -17,3 +17,28 @@ Its members are an implementation detail and are defined in the
 .. doxygenfunction:: dcgInit
 .. doxygenfunction:: dcgDeinit
 .. doxygenfunction:: dcgFreeState
+
+Windowing
+---------
+
+These functions allow interaction with the windowing system.
+
+.. doxygenfunction:: dcgShouldClose
+.. doxygenfunction:: dcgClose
+.. doxygenfunction:: dcgGetMousePosition
+.. doxygenfunction:: dcgUpdate
+
+Commands
+--------
+
+.. doxygenfunction:: dcgCmdBegin
+.. doxygenfunction:: dcgCmdBindVertexBuf
+.. doxygenfunction:: dcgCmdBindIndexBuf
+.. doxygenfunction:: dcgCmdBindMat
+.. doxygenfunction:: dcgCmdDraw
+.. doxygenfunction:: dcgSubmit
+
+Materials
+---------
+
+TODO! Materials are vulkan pipelines and layouts together.

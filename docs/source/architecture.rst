@@ -28,7 +28,7 @@ such as vectors and matricies. Mathematics is under the ``DCm`` namespace.
 
 Vectors and Matricies are provided with different underlying types (``float``, ``int``, etc.)
 A 4D vector of unsigned 16-bit ingegers is called :code:`DCmVector4u16`. A 3 by 3 matrix of
-floats is :code:`DCmMatrix3x3f`. There are also some useful typedefs, a ``DCmVector2`` is
+floats is :code:`DCmMatrix3x3f`. There are also some useful typedefs, for example a ``DCmVector2`` is
 a ``DCmVector2f``.
 
 Memory
