@@ -24,3 +24,15 @@ void dcgFreeCmdPool(DCgState *s, DCgCmdPool *pool) {
 
 	vkDestroyCommandPool(s->device, (void *)pool, s->allocator);
 }
+
+DCgCmdBuffer *dcgGetNewCmdBuffer(DCgState *s, DCgCmdPool *pool) {
+	VkCommandBufferAllocateInfo allocInfo = { 0 };
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = (void *)pool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = 1;
+
+	VkCommandBuffer buffer;
+	DC_ASSERT(vkAllocateCommandBuffers(s->device, &allocInfo, &buffer), "Failed to allocate command buffers!");
+	return (void *)buffer;
+}

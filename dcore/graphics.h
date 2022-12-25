@@ -8,7 +8,7 @@ typedef struct DCgState DCgState;
 typedef struct DCgAlloc DCgAlloc;
 typedef struct DCgBuffer DCgBuffer;
 typedef struct DCgMaterial DCgMaterial;
-typedef struct DCgCmdBuffer DCgCmdBuffer;
+typedef void DCgCmdBuffer;
 typedef void *DCgCmdPool;
 
 typedef DCgBuffer DCgVertexBuffer;
@@ -53,19 +53,33 @@ void dcgFreeCmdPool(DCgState *s, DCgCmdPool *pool);
 /** Creates a new command buffer */
 DCgCmdBuffer *dcgGetNewCmdBuffer(DCgState *s, DCgCmdPool *pool);
 
-/** Begin command */
+/** Begin command buffer. */
 void dcgCmdBegin(DCgState *s, DCgCmdBuffer *cmds);
-/** Binds a vertex buffer */
+
+/** End command buffer. */
+void dcgCmdEnd(DCgState *s, DCgCmdBuffer *cmds);
+
+/** Binds a vertex buffer. */
 void dcgCmdBindVertexBuf(DCgState *s, DCgCmdBuffer *cmds, DCgVertexBuffer *vbuf);
-/** Binds an index buffer */
+
+/** Binds an index buffer. */
 void dcgCmdBindIndexBuf(DCgState *s, DCgCmdBuffer *cmds, DCgIndexBuffer *ibuf);
-/** Binds a material (pipelines + stuff) */
+
+/** Binds a material (pipelines + stuff). */
 void dcgCmdBindMat(DCgState *s, DCgCmdBuffer *cmds, DCgMaterial *mat);
+
+/** Begins a render pass with index `index`. */
+void dcgCmdBeginRenderPass(DCgState *s, DCgCmdBuffer *cmds, size_t index);
+
+/** Ends the current render pass. */
+void dcgCmdEndRenderPass(DCgState *s, DCgCmdBuffer *cmds);
+
 /** Draws some instances with the specified
  * number indices from the bound vertex/index buffers.
  * @param indices number of indices to draw per instance.
  * @param instances number of instances to draw. */
 void dcgCmdDraw(DCgState *s, DCgCmdBuffer *cmds, size_t indices, size_t instances);
+
 /** Submit a command buffer into a queue. */
 void dcgSubmit(DCgState *s, DCgCmdBuffer *cmds, int queue);
 
@@ -127,6 +141,7 @@ DCgMaterial *dcgNewMaterial(
 DCgMaterialCache *dcgGetMaterialCache(DCgState *state, DCgMaterial *material);
 void dcgFreeMaterial(DCgState *state, DCgMaterial *material);
 
-DCgShaderModule dcgNewShaderModule(DCgState *state, DCgShaderStage stage, size_t size, uint32_t *code, const char *name);
+void dcgInitShaderModule(DCgState *state, DCgShaderModule *module, DCgShaderStage stage, size_t size, uint32_t *code, const char *name);
+void dcgFreeShaderModule(DCgState *state, DCgShaderModule *module);
 
 #endif

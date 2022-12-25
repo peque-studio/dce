@@ -26,7 +26,7 @@ AllowShortBlocksOnASingleLine: Empty
 AlignOperands: DontAlign # AlignAfterOperator
 AlignEscapedNewlines: DontAlign
 AlignConsecutiveDeclarations: None
-AlignArrayOfStructures: Right
+AlignArrayOfStructures: None
 AlignAfterOpenBracket: BlockIndent
 SpaceBeforeParens: Never
 BreakBeforeBinaryOperators: All

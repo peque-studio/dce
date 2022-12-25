@@ -14,6 +14,25 @@ void CreateLayout_(DCgState *state, DCgMaterial *material, DCgMaterialOptions *o
 	vkCreatePipelineLayout(state->device, &createInfo, NULL, &material->layout);
 }
 
+void dcgInitShaderModule(DCgState *state, DCgShaderModule *module, DCgShaderStage stage, size_t size, uint32_t *code, const char *name) {
+	module->stage = stage;
+	module->name = name;
+
+	VkShaderModuleCreateInfo createInfo = { 0 };
+	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	createInfo.codeSize = size;
+	createInfo.pCode = code;
+
+	DC_ASSERT(
+	  vkCreateShaderModule(state->device, &createInfo, state->allocator, (VkShaderModule *)&module->module) == VK_SUCCESS,
+	  "Failed to create shader module"
+	);
+}
+
+void dcgFreeShaderModule(DCgState *state, DCgShaderModule *module) {
+	vkDestroyShaderModule(state->device, (VkShaderModule)module->module, state->allocator);
+}
+
 DCgMaterial *dcgNewMaterial(DCgState *state, size_t moduleCount, DCgShaderModule *modules, DCgMaterialOptions *options, DCgMaterialCache *cache) {
 	DCgMaterial *material = malloc(sizeof(DCgMaterial));
 	CreateLayout_(state, material, options);
