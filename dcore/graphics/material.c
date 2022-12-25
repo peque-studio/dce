@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <vulkan/vulkan_core.h>
 
-void CreateLayout_(DCgState *state, DCgMaterial *material, DCgMaterialOptions *options) {
+void CreateLayout_(DCgState *state, DCgMaterial *material, const DCgMaterialOptions *options) {
 	VkPipelineLayoutCreateInfo createInfo = { 0 };
 	createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	createInfo.pushConstantRangeCount = (uint32_t)dcgiGetPushConstantRanges(state, options->pushConstantsIndex, NULL);
@@ -33,7 +33,8 @@ void dcgFreeShaderModule(DCgState *state, DCgShaderModule *module) {
 	vkDestroyShaderModule(state->device, (VkShaderModule)module->module, state->allocator);
 }
 
-DCgMaterial *dcgNewMaterial(DCgState *state, size_t moduleCount, DCgShaderModule *modules, DCgMaterialOptions *options, DCgMaterialCache *cache) {
+DCgMaterial *
+dcgNewMaterial(DCgState *state, size_t moduleCount, DCgShaderModule *modules, const DCgMaterialOptions *options, const DCgMaterialCache *cache) {
 	DCgMaterial *material = malloc(sizeof(DCgMaterial));
 	CreateLayout_(state, material, options);
 

@@ -66,11 +66,18 @@ struct DCgState {
 		size_t count;
 		VkVertexInputAttributeDescription attributes[];
 	} * vertexAttributes;
+
+	VkQueue queueCache[3];
 };
 
 struct DCgMaterial {
 	VkPipeline pipeline;
 	VkPipelineLayout layout;
+};
+
+struct DCgBuffer {
+	uint32_t size;
+	VkBuffer buffer;
 };
 
 VkRenderPass dcgiAddRenderPass(

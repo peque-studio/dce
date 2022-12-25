@@ -1,6 +1,7 @@
 #include <dcore/debug.h>
 #include <dcore/graphics.h>
 #include <dcore/graphics/internal.h>
+#include <string.h>
 
 DCgCmdPool *dcgNewCmdPool(DCgState *s, DCgCmdPoolType type) {
 	VkCommandPool commandPool;
@@ -35,4 +36,60 @@ DCgCmdBuffer *dcgGetNewCmdBuffer(DCgState *s, DCgCmdPool *pool) {
 	VkCommandBuffer buffer;
 	DC_ASSERT(vkAllocateCommandBuffers(s->device, &allocInfo, &buffer), "Failed to allocate command buffers!");
 	return (void *)buffer;
+}
+
+void dcgCmdBegin(DCgState *s, DCgCmdBuffer *cmds) {
+	VkCommandBufferBeginInfo beginInfo = { 0 };
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	DC_ASSERT(vkBeginCommandBuffer(cmds, &beginInfo) == VK_SUCCESS, "Failed to begin command buffer.");
+}
+
+void dcgCmdEnd(DCgState *s, DCgCmdBuffer *cmds) { DC_ASSERT(vkEndCommandBuffer(cmds) == VK_SUCCESS, "Failed to end command buffer."); }
+
+void dcgCmdBindVertexBuf(DCgState *s, DCgCmdBuffer *cmds, const DCgVertexBuffer *vbuf) {
+	VkBuffer vertexBuffers[] = { vbuf->buffer };
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers(cmds, 0, 1, vertexBuffers, offsets);
+}
+
+void dcgCmdBindIndexBuf(DCgState *s, DCgCmdBuffer *cmds, const DCgIndexBuffer *ibuf, enum DCgIndexType type) {
+	vkCmdBindIndexBuffer(cmds, ibuf->buffer, 0, (VkIndexType)type);
+}
+
+void dcgCmdBindMat(DCgState *s, DCgCmdBuffer *cmds, DCgMaterial *mat) { vkCmdBindPipeline(cmds, VK_PIPELINE_BIND_POINT_GRAPHICS, mat->pipeline); }
+
+void dcgCmdBeginRenderPass(DCgState *s, DCgCmdBuffer *cmds, const DCgCmdBeginRenderPassInfo *info) {
+	DC_RASSERT(info->renderPassIndex < s->renderPassCount, "Render pass index out of bounds.");
+	VkRenderPassBeginInfo beginInfo = { 0 };
+	beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	beginInfo.renderPass = s->renderPasses[info->renderPassIndex];
+	beginInfo.renderArea.offset = (VkOffset2D){ info->renderArea.offset[0], info->renderArea.offset[1] };
+	beginInfo.renderArea.extent = (VkExtent2D){ info->renderArea.extent[0], info->renderArea.extent[1] };
+	beginInfo.clearValueCount = info->clearValueCount;
+	beginInfo.pClearValues = dcmemAllocate(sizeof(VkClearValue) * info->clearValueCount);
+	for(size_t i = 0; i < info->clearValueCount; ++i) {
+		memcpy(
+		  (void *)&beginInfo.pClearValues[i], &info->clearValues[i],
+		  sizeof(info->clearValues[i]) > sizeof(beginInfo.pClearValues[i]) ? sizeof(beginInfo.pClearValues[i]) : sizeof(info->clearValues[i])
+		);
+	}
+
+	vkCmdBeginRenderPass(cmds, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	dcmemDeallocate((void *)beginInfo.pClearValues);
+}
+
+void dcgCmdEndRenderPass(DCgState *s, DCgCmdBuffer *cmds) { vkCmdEndRenderPass(cmds); }
+
+void dcgSubmit(DCgState *s, DCgCmdBuffer *cmds, int queue) {
+	VkSubmitInfo submitInfo = { 0 };
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.waitSemaphoreCount = 0;
+	submitInfo.pWaitSemaphores = NULL;
+	submitInfo.pWaitDstStageMask = NULL;
+	submitInfo.signalSemaphoreCount = 0;
+	submitInfo.pSignalSemaphores = NULL;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = (VkCommandBuffer *)&cmds;
+	DC_ASSERT(vkQueueSubmit(dcgiGetQueue(s, queue), 1, &submitInfo, VK_NULL_HANDLE) == VK_SUCCESS, "Failed to submit queue.");
 }

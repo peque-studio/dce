@@ -1,7 +1,7 @@
 #ifndef DCORE_GRAPHICS_H
 #define DCORE_GRAPHICS_H
 #include <dcore/common.h>
-#include <dcore/math/vector.h>
+#include <dcore/math.h>
 #include <stddef.h>
 
 typedef struct DCgState DCgState;
@@ -60,16 +60,34 @@ void dcgCmdBegin(DCgState *s, DCgCmdBuffer *cmds);
 void dcgCmdEnd(DCgState *s, DCgCmdBuffer *cmds);
 
 /** Binds a vertex buffer. */
-void dcgCmdBindVertexBuf(DCgState *s, DCgCmdBuffer *cmds, DCgVertexBuffer *vbuf);
+void dcgCmdBindVertexBuf(DCgState *s, DCgCmdBuffer *cmds, const DCgVertexBuffer *vbuf);
+
+enum DCgIndexType {
+	DCG_INDEX_TYPE_UINT16 = 0,
+	DCG_INDEX_TYPE_UINT32 = 1,
+};
 
 /** Binds an index buffer. */
-void dcgCmdBindIndexBuf(DCgState *s, DCgCmdBuffer *cmds, DCgIndexBuffer *ibuf);
+void dcgCmdBindIndexBuf(DCgState *s, DCgCmdBuffer *cmds, const DCgIndexBuffer *ibuf, enum DCgIndexType type);
 
 /** Binds a material (pipelines + stuff). */
 void dcgCmdBindMat(DCgState *s, DCgCmdBuffer *cmds, DCgMaterial *mat);
 
+typedef struct DCgCmdBeginRenderPassInfo {
+	size_t renderPassIndex;
+	DCmRect2 renderArea;
+	size_t clearValueCount;
+	const struct {
+		DCmVector4f color;
+		union {
+			float depth;
+			uint32_t stencil;
+		} depthStencil;
+	} * clearValues;
+} DCgCmdBeginRenderPassInfo;
+
 /** Begins a render pass with index `index`. */
-void dcgCmdBeginRenderPass(DCgState *s, DCgCmdBuffer *cmds, size_t index);
+void dcgCmdBeginRenderPass(DCgState *s, DCgCmdBuffer *cmds, const DCgCmdBeginRenderPassInfo *info);
 
 /** Ends the current render pass. */
 void dcgCmdEndRenderPass(DCgState *s, DCgCmdBuffer *cmds);
@@ -135,7 +153,7 @@ typedef struct DCgMaterialOptions {
 typedef struct DCgMaterialCache DCgMaterialCache;
 
 DCgMaterial *dcgNewMaterial(
-  DCgState *state, size_t moduleCount, DCgShaderModule *modules, DCgMaterialOptions *options, DCgMaterialCache *cache /* = NULL */
+  DCgState *state, size_t moduleCount, DCgShaderModule *modules, const DCgMaterialOptions *options, const DCgMaterialCache *cache /* = NULL */
 );
 
 DCgMaterialCache *dcgGetMaterialCache(DCgState *state, DCgMaterial *material);

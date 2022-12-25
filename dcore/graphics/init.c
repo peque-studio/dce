@@ -325,10 +325,8 @@ static void createLogicalDevice(DCgState *state) {
 
 VkQueue dcgiGetQueue(DCgState *state, uint32_t index) {
 	DC_ASSERT(index < 3, "Queue family index too big!");
-	static VkQueue queues[3] = { 0 }; // TODO: this is the maximum possible number of queues
-	if(queues[index] != NULL) return queues[index];
-	vkGetDeviceQueue(state->device, index, 0, &queues[index]);
-	return queues[index];
+	if(state->queueCache[index] == NULL) vkGetDeviceQueue(state->device, index, 0, &state->queueCache[index]);
+	return state->queueCache[index];
 }
 
 void createRenderPasses(DCgState *state) {
@@ -426,6 +424,8 @@ DCgState *dcgNewState() {
 	state->vertexAttributesCount = 0;
 	state->vertexBindingsCount = 0;
 	state->pushConstantRangesCount = 0;
+	memset(state->queueCache, 0, sizeof(state->queueCache));
+
 	return state;
 }
 
