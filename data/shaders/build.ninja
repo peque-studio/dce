@@ -1,0 +1,3 @@
+
+build data/shaders/basic.vert.spirv: glslc data/shaders/basic.vert
+build data/shaders/basic.frag.spirv: glslc data/shaders/basic.frag

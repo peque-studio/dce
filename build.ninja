@@ -11,5 +11,9 @@ rule ld
 rule ar
   command = ar rc $out $in
 
+rule glslc
+  command = glslc $in -o $out
+
 include dcore/build.ninja
 include tests/build.ninja
+include data/shaders/build.ninja

@@ -35,8 +35,7 @@ typedef struct DCgBasicRendererUniformBuffer {
 
 typedef struct DCgBasicRendererTransformUniformBuffer {
 	DCgBasicRendererUniformBuffer base;
-	DCmMatrix4x4 world;
-	DCmMatrix4x4 view;
+	DCmMatrix4x4 worldView;
 } DCgBasicRendererTransformUniformBuffer;
 
 #endif

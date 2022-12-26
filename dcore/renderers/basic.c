@@ -70,7 +70,7 @@ void dcgBasicRendererCreateInfo(DCgState *state) {
 		},
 	};
 
-	dcgiAddRenderPass(state, 2, attachments, 1, subpasses, 1, dependencies);
+	dcgiAddRenderPass(state, /* 2 */ 1, attachments, 1, subpasses, 1, dependencies);
 
 	VkDescriptorSetLayout *setLayouts = dcgiAddDescriptorSetLayouts(state, 2);
 
@@ -116,10 +116,10 @@ void dcgBasicRendererCreateInfo(DCgState *state) {
 	VkPushConstantRange *ranges = dcgiAddPushConstantRanges(state, DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_ENUM_MAX);
 	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_BASE].offset = 0;
 	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_BASE].size = sizeof(DCgBasicRendererUniformBuffer);
-	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_BASE].stageFlags = VK_SHADER_STAGE_ALL;
+	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_BASE].stageFlags = VK_SHADER_STAGE_ALL & ~VK_SHADER_STAGE_VERTEX_BIT;
 	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_TRANSFORM].offset = 0;
 	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_TRANSFORM].size = sizeof(DCgBasicRendererTransformUniformBuffer);
-	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_TRANSFORM].stageFlags = VK_SHADER_STAGE_ALL;
+	ranges[DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_TRANSFORM].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
 	VkVertexInputAttributeDescription *attributes = dcgiAddVertexAttributes(state, 3);
 	attributes[DCG_BASIC_RENDERER_VERTEX_ATTRIBUTE_POSITION].binding = 0;

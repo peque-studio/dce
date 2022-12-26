@@ -34,7 +34,7 @@ DCgCmdBuffer *dcgGetNewCmdBuffer(DCgState *s, DCgCmdPool *pool) {
 	allocInfo.commandBufferCount = 1;
 
 	VkCommandBuffer buffer;
-	DC_ASSERT(vkAllocateCommandBuffers(s->device, &allocInfo, &buffer), "Failed to allocate command buffers!");
+	DC_ASSERT(vkAllocateCommandBuffers(s->device, &allocInfo, &buffer) == VK_SUCCESS, "Failed to allocate command buffers!");
 	return (void *)buffer;
 }
 
@@ -59,6 +59,7 @@ void dcgCmdBindIndexBuf(DCgState *s, DCgCmdBuffer *cmds, const DCgIndexBuffer *i
 void dcgCmdBindMat(DCgState *s, DCgCmdBuffer *cmds, DCgMaterial *mat) { vkCmdBindPipeline(cmds, VK_PIPELINE_BIND_POINT_GRAPHICS, mat->pipeline); }
 
 void dcgCmdBeginRenderPass(DCgState *s, DCgCmdBuffer *cmds, const DCgCmdBeginRenderPassInfo *info) {
+	DC_RASSERT(info != NULL, "Passed null info into dcgCmdBeginRenderPass");
 	DC_RASSERT(info->renderPassIndex < s->renderPassCount, "Render pass index out of bounds.");
 	VkRenderPassBeginInfo beginInfo = { 0 };
 	beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -67,6 +68,7 @@ void dcgCmdBeginRenderPass(DCgState *s, DCgCmdBuffer *cmds, const DCgCmdBeginRen
 	beginInfo.renderArea.extent = (VkExtent2D){ info->renderArea.extent[0], info->renderArea.extent[1] };
 	beginInfo.clearValueCount = info->clearValueCount;
 	beginInfo.pClearValues = dcmemAllocate(sizeof(VkClearValue) * info->clearValueCount);
+	beginInfo.framebuffer = info->framebuffer;
 	for(size_t i = 0; i < info->clearValueCount; ++i) {
 		memcpy(
 		  (void *)&beginInfo.pClearValues[i], &info->clearValues[i],
