@@ -41,22 +41,26 @@ DCgCmdBuffer *dcgGetNewCmdBuffer(DCgState *s, DCgCmdPool *pool) {
 void dcgCmdBegin(DCgState *s, DCgCmdBuffer *cmds) {
 	VkCommandBufferBeginInfo beginInfo = { 0 };
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	DC_ASSERT(vkBeginCommandBuffer(cmds, &beginInfo) == VK_SUCCESS, "Failed to begin command buffer.");
+	DC_ASSERT(vkBeginCommandBuffer((VkCommandBuffer)cmds, &beginInfo) == VK_SUCCESS, "Failed to begin command buffer.");
 }
 
-void dcgCmdEnd(DCgState *s, DCgCmdBuffer *cmds) { DC_ASSERT(vkEndCommandBuffer(cmds) == VK_SUCCESS, "Failed to end command buffer."); }
+void dcgCmdEnd(DCgState *s, DCgCmdBuffer *cmds) {
+	DC_ASSERT(vkEndCommandBuffer((VkCommandBuffer)cmds) == VK_SUCCESS, "Failed to end command buffer.");
+}
 
 void dcgCmdBindVertexBuf(DCgState *s, DCgCmdBuffer *cmds, const DCgVertexBuffer *vbuf) {
 	VkBuffer vertexBuffers[] = { vbuf->buffer };
 	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(cmds, 0, 1, vertexBuffers, offsets);
+	vkCmdBindVertexBuffers((VkCommandBuffer)cmds, 0, 1, vertexBuffers, offsets);
 }
 
 void dcgCmdBindIndexBuf(DCgState *s, DCgCmdBuffer *cmds, const DCgIndexBuffer *ibuf, enum DCgIndexType type) {
-	vkCmdBindIndexBuffer(cmds, ibuf->buffer, 0, (VkIndexType)type);
+	vkCmdBindIndexBuffer((VkCommandBuffer)cmds, ibuf->buffer, 0, (VkIndexType)type);
 }
 
-void dcgCmdBindMat(DCgState *s, DCgCmdBuffer *cmds, DCgMaterial *mat) { vkCmdBindPipeline(cmds, VK_PIPELINE_BIND_POINT_GRAPHICS, mat->pipeline); }
+void dcgCmdBindMat(DCgState *s, DCgCmdBuffer *cmds, DCgMaterial *mat) {
+	vkCmdBindPipeline((VkCommandBuffer)cmds, VK_PIPELINE_BIND_POINT_GRAPHICS, mat->pipeline);
+}
 
 void dcgCmdBeginRenderPass(DCgState *s, DCgCmdBuffer *cmds, const DCgCmdBeginRenderPassInfo *info) {
 	DC_RASSERT(info != NULL, "Passed null info into dcgCmdBeginRenderPass");
@@ -68,7 +72,7 @@ void dcgCmdBeginRenderPass(DCgState *s, DCgCmdBuffer *cmds, const DCgCmdBeginRen
 	beginInfo.renderArea.extent = (VkExtent2D){ info->renderArea.extent[0], info->renderArea.extent[1] };
 	beginInfo.clearValueCount = info->clearValueCount;
 	beginInfo.pClearValues = dcmemAllocate(sizeof(VkClearValue) * info->clearValueCount);
-	beginInfo.framebuffer = info->framebuffer;
+	beginInfo.framebuffer = (VkFramebuffer)info->framebuffer;
 	for(size_t i = 0; i < info->clearValueCount; ++i) {
 		memcpy(
 		  (void *)&beginInfo.pClearValues[i], &info->clearValues[i],
@@ -76,22 +80,22 @@ void dcgCmdBeginRenderPass(DCgState *s, DCgCmdBuffer *cmds, const DCgCmdBeginRen
 		);
 	}
 
-	vkCmdBeginRenderPass(cmds, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass((VkCommandBuffer)cmds, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	dcmemDeallocate((void *)beginInfo.pClearValues);
 }
 
-void dcgCmdEndRenderPass(DCgState *s, DCgCmdBuffer *cmds) { vkCmdEndRenderPass(cmds); }
+void dcgCmdEndRenderPass(DCgState *s, DCgCmdBuffer *cmds) { vkCmdEndRenderPass((VkCommandBuffer)cmds); }
 
-void dcgSubmit(DCgState *s, DCgCmdBuffer *cmds, int queue) {
+void dcgSubmit(DCgState *s, const DCgSubmitInfo *info) {
 	VkSubmitInfo submitInfo = { 0 };
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.waitSemaphoreCount = 0;
-	submitInfo.pWaitSemaphores = NULL;
-	submitInfo.pWaitDstStageMask = NULL;
-	submitInfo.signalSemaphoreCount = 0;
-	submitInfo.pSignalSemaphores = NULL;
+	submitInfo.waitSemaphoreCount = info->waitSemaphoreCount;
+	submitInfo.pWaitSemaphores = (const VkSemaphore *)info->waitSemaphores;
+	submitInfo.pWaitDstStageMask = (const VkPipelineStageFlags *)info->waitPipelineStages;
+	submitInfo.signalSemaphoreCount = info->signalSemaphoreCount;
+	submitInfo.pSignalSemaphores = (const VkSemaphore *)info->signalSemaphores;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = (VkCommandBuffer *)&cmds;
-	DC_ASSERT(vkQueueSubmit(dcgiGetQueue(s, queue), 1, &submitInfo, VK_NULL_HANDLE) == VK_SUCCESS, "Failed to submit queue.");
+	submitInfo.pCommandBuffers = (VkCommandBuffer *)&info->commandBuffer;
+	DC_ASSERT(vkQueueSubmit(dcgiGetQueue(s, info->queueIndex), 1, &submitInfo, VK_NULL_HANDLE) == VK_SUCCESS, "Failed to submit queue.");
 }

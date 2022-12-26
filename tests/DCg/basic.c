@@ -40,6 +40,20 @@ DCT_TEST(basicRendererInit, "basic renderer init test") {
 	DCD_DEBUG("dcgBasicRendererCreateInfo");
 	dcgBasicRendererCreateInfo(state);
 
+	size_t swapchainImageCount = dcgGetSwapchainImageCount(state);
+	DCgImageView **swapchainImageViews = dcmemAllocate(sizeof(DCgImageView *) * swapchainImageCount);
+	DCgFramebuffer **swapchainFramebuffers = dcmemAllocate(sizeof(DCgFramebuffer *) * swapchainImageCount);
+
+	for(size_t i = 0; i < swapchainImageCount; ++i) {
+		swapchainImageViews[i] = dcgNewImageViewFromSwapchain(state, i);
+	}
+
+	for(size_t i = 0; i < swapchainImageCount; ++i) {
+		swapchainFramebuffers[i] = dcgNewFramebuffer(
+		  state, &(DcgFramebufferInfo){ .attachmentCount = 1, .attachments = &swapchainImageViews[i], .renderPassIndex = 0, .size = { 640, 480, 1 } }
+		);
+	}
+
 	DCgCmdPool *pool = dcgNewCmdPool(state, DCG_CMD_POOL_TYPE_GRAPHICS);
 	DCgCmdBuffer *buffer = dcgGetNewCmdBuffer(state, pool);
 
@@ -47,48 +61,95 @@ DCT_TEST(basicRendererInit, "basic renderer init test") {
 	loadShaderModuleFromFile(state, &modules[0], "data/shaders/basic.vert.spirv", DCG_SHADER_STAGE_VERTEX);
 	loadShaderModuleFromFile(state, &modules[1], "data/shaders/basic.frag.spirv", DCG_SHADER_STAGE_FRAGMENT);
 
-	DCgMaterialInfo materialOptions = {
-		.scissorOffset = { 0, 0 },
-		.scissorExtent = { 0, 0 },
-		.cullMode = DCG_CULL_MODE_NONE,
-		.lineWidth = 1.0f,
-		.polygonMode = DCG_POLYGON_MODE_FILL,
-		.enableDiscard = false,
-		.enableDepthTest = false,
-		.enableDepthWrite = false,
-		.depthCompareOp = DCG_COMAPRE_OP_ALWAYS,
-		.enableDepthBoundsTest = false,
-		.minDepthBound = 0.0f,
-		.maxDepthBound = 1.0f,
-		.enableStencilTest = false,
-		.viewportExtent = { 640, 480 },
-		.pushConstantsIndex = 0,
-		.descriptorSetsIndex = 0,
-		.vertexInputIndex = 0,
-	};
+	DCgMaterial *material = dcgNewMaterial(
+	  state, 2, modules,
+	  &(DCgMaterialInfo){
+	    .scissorOffset = { 0, 0 },
+	    .scissorExtent = { 0, 0 },
+	    .cullMode = DCG_CULL_MODE_NONE,
+	    .lineWidth = 1.0f,
+	    .polygonMode = DCG_POLYGON_MODE_FILL,
+	    .enableDiscard = false,
+	    .enableDepthTest = false,
+	    .enableDepthWrite = false,
+	    .depthCompareOp = DCG_COMAPRE_OP_ALWAYS,
+	    .enableDepthBoundsTest = false,
+	    .minDepthBound = 0.0f,
+	    .maxDepthBound = 1.0f,
+	    .enableStencilTest = false,
+	    .viewportExtent = { 640, 480 },
+	    .pushConstantsIndex = 0,
+	    .descriptorSetsIndex = 0,
+	    .vertexInputIndex = 0,
+	  },
+	  NULL
+	);
 
-	DCgMaterial *material = dcgNewMaterial(state, 2, modules, &materialOptions, NULL);
+	DCgSemaphore *imageAvailableSemaphore = dcgNewSemaphore(state);
+	DCgSemaphore *renderFinishedSemaphore = dcgNewSemaphore(state);
+	DCgFence *inFlightFence = dcgNewFence(state, true);
 
 	while(!dcgShouldClose(state)) {
 		dcgUpdate(state);
+
+		dcgWaitForFence(state, inFlightFence);
+		uint32_t imageIndex = dcgAcquireNextSwapchainImage(state, imageAvailableSemaphore, NULL);
+
 		dcgCmdBegin(state, buffer);
 		dcgCmdBeginRenderPass(
 		  state, buffer,
-		  &(DCgCmdBeginRenderPassInfo){ .renderPassIndex = 0,
-		                                .renderArea = { .offset = { 0, 0 }, .extent = { 640, 480 } },
-		                                .clearValueCount = 1,
-		                                .clearValues = &(DCgClearValue){ .color = { 0, 0, 0, 0 } } }
+		  &(DCgCmdBeginRenderPassInfo){
+		    .renderPassIndex = 0,
+		    .renderArea = { .offset = { 0, 0 }, .extent = { 640, 480 } },
+		    .clearValueCount = 1,
+		    .clearValues = (DCgClearValue[2]){
+					{ .color = { 0, 0, 0, 0 } },
+					{ .color = { 0, 1, 1, 0 } },
+				},
+				.framebuffer = swapchainFramebuffers[imageIndex]
+		  }
 		);
 		dcgCmdBindMat(state, buffer, material);
 		dcgCmdEndRenderPass(state, buffer);
 		dcgCmdEnd(state, buffer);
-		dcgSubmit(state, buffer, 0);
+		dcgSubmit(
+		  state,
+		  &(DCgSubmitInfo){
+		    .commandBuffer = buffer,
+		    .queueIndex = 0,
+		    .waitSemaphoreCount = 1,
+		    .waitSemaphores = &imageAvailableSemaphore,
+		    .waitPipelineStages = (enum DCgPipelineStage[1]){ DCG_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT },
+		    .signalSemaphoreCount = 1,
+		    .signalSemaphores = &renderFinishedSemaphore,
+		  }
+		);
+
+		dcgPresent(
+		  state,
+		  &(DCgPresentInfo){
+		    .queueIndex = 0,
+		    .waitSemaphoreCount = 1,
+		    .waitSemaphores = &renderFinishedSemaphore,
+		    .imageIndex = imageIndex,
+		  }
+		);
 	}
 
+	dcgWaitForQueue(state, 0);
+
 	DCD_MSGF(DEBUG, "DeInitializing State");
+	dcgFreeFence(state, inFlightFence);
+	dcgFreeSemaphore(state, renderFinishedSemaphore);
+	dcgFreeSemaphore(state, imageAvailableSemaphore);
+	dcgFreeMaterial(state, material);
 	dcgFreeShaderModule(state, &modules[0]);
 	dcgFreeShaderModule(state, &modules[1]);
 	dcgFreeCmdPool(state, pool);
+	for(size_t i = 0; i < swapchainImageCount; ++i) {
+		dcgFreeFramebuffer(state, swapchainFramebuffers[i]);
+		dcgFreeImageView(state, swapchainImageViews[i]);
+	}
 	dcgDeinit(state);
 	DCD_MSGF(DEBUG, "Freeing State");
 	dcgFreeState(state);

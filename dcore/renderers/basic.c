@@ -54,7 +54,7 @@ void dcgBasicRendererCreateInfo(DCgState *state) {
 		  .preserveAttachmentCount = 0,
 		  .pPreserveAttachments = NULL,
 		  .pResolveAttachments = NULL,
-		  .pDepthStencilAttachment = &attachmentReferences[1],
+		  .pDepthStencilAttachment = NULL, // &attachmentReferences[1],
 		},
 	};
 

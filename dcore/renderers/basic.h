@@ -25,6 +25,7 @@ typedef enum DCgBasicRendererPushConstantRange {
 	DCG_BASIC_RENDERER_PUSH_CONSTANT_RANGE_ENUM_MAX
 } DCgBasicRendererPushConstantRange;
 
+// TODO: See if this fits into the minimum pushConstantRange
 typedef struct DCgBasicRendererTransformPushConstant {
 	DCmMatrix4x4 transform;
 } DCgBasicRendererTransformPushConstant;

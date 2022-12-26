@@ -17,25 +17,31 @@ typedef struct DCgBuffer DCgBuffer;
 typedef struct DCgMaterial DCgMaterial;
 
 /** Stores commands. */
-typedef void DCgCmdBuffer;
+typedef struct DCgCmdBuffer DCgCmdBuffer;
 
 /** Allocates and stores command buffers. @see DCgCmdBuffer */
-typedef void DCgCmdPool;
+typedef struct DCgCmdPool DCgCmdPool;
 
 /** Combines multiple image views (attachments). */
-typedef void DCgFramebuffer;
+typedef struct DCgFramebuffer DCgFramebuffer;
 
 /** View into an image. */
-typedef void DCgImageView;
+typedef struct DCgImageView DCgImageView;
 
 /** Stores image data, basically a buffer. */
-typedef void DCgImage;
+typedef struct DCgImage DCgImage;
 
 /** Same as a `DCgBuffer`, but with semantic meaning. @see DCgBuffer */
 typedef DCgBuffer DCgVertexBuffer;
 
 /** Same as a `DCgBuffer`, but with semantic meaning. @see DCgBuffer */
 typedef DCgBuffer DCgIndexBuffer;
+
+/** Synchronization primitive. Allows for synchronization on GPU side. */
+typedef struct DCgSemaphore DCgSemaphore;
+
+/** Synchronization primitive. Allows for synchronization between the host and the GPU. */
+typedef struct DCgFence DCgFence;
 
 /** Creates and allocates a graphics state */
 DCgState *dcgNewState();
@@ -65,11 +71,31 @@ void dcgGetMousePosition(DCgState *state, DCmVector2i mousePosition);
 /** Updates the window. (polls for new events) */
 void dcgUpdate(DCgState *state);
 
+/** Returns the number of images a swapchain has. */
+size_t dcgGetSwapchainImageCount(DCgState *state);
+
+/** Let the swapchain choose the next image.
+ * @param semaphore A semaphore to signal when an image has been acquired (can be NULL).
+ * @param fence A fence to signal when an image has been acquired (can be NULL). */
+uint32_t dcgAcquireNextSwapchainImage(DCgState *state, DCgSemaphore *semaphore, DCgFence *fence);
+
+/** Create a new semaphore. */
+DCgSemaphore *dcgNewSemaphore(DCgState *state);
+
+/** Free a semaphore. */
+void dcgFreeSemaphore(DCgState *state, DCgSemaphore *semaphore);
+
+/** Create a new fence. */
+DCgFence *dcgNewFence(DCgState *state, bool createSignaled /* = false */);
+
+/** Free a fence. */
+void dcgFreeFence(DCgState *state, DCgFence *fence);
+
 typedef struct DcgFramebufferInfo {
-	size_t attachmentCount;    /** Number of attachments in the framebuffer. */
-	DCgImageView *attachments; /** Pointer to vector of attachments. */
-	size_t renderPassIndex;    /** Render pass the framebuffer should be compatible with. */
-	DCmExtent3 size;           /** Dimensions of the framebuffer. (width, height, layers) */
+	size_t attachmentCount;     /** Number of attachments in the framebuffer. */
+	DCgImageView **attachments; /** Pointer to vector of attachments. */
+	size_t renderPassIndex;     /** Render pass the framebuffer should be compatible with. */
+	DCmExtent3 size;            /** Dimensions of the framebuffer. (width, height, layers) */
 } DcgFramebufferInfo;
 
 /** Create new framebuffer. */
@@ -242,15 +268,62 @@ void dcgCmdEndRenderPass(DCgState *s, DCgCmdBuffer *cmds);
  * @param instances number of instances to draw. */
 void dcgCmdDraw(DCgState *s, DCgCmdBuffer *cmds, size_t indices, size_t instances);
 
-/** Submit a command buffer into a queue. */
-void dcgSubmit(DCgState *s, DCgCmdBuffer *cmds, int queue);
+typedef struct DCgSubmitInfo {
+	DCgCmdBuffer *commandBuffer;
+	size_t queueIndex;
+	size_t waitSemaphoreCount;
+	DCgSemaphore **waitSemaphores;
+	enum DCgPipelineStage *waitPipelineStages;
+	size_t signalSemaphoreCount;
+	DCgSemaphore **signalSemaphores;
+} DCgSubmitInfo;
 
-typedef enum DCgPipelineStage {
+/** Submit a command buffer into a queue. */
+void dcgSubmit(DCgState *s, const DCgSubmitInfo *info);
+
+typedef struct DCgPresentInfo {
+	size_t queueIndex;
+	size_t waitSemaphoreCount;
+	DCgSemaphore **waitSemaphores;
+	uint32_t imageIndex;
+} DCgPresentInfo;
+
+/** Presents an image from a swapchain. */
+void dcgPresent(DCgState *s, const DCgPresentInfo *info);
+
+/** Waits for queue to finish executing all command buffers. */
+void dcgWaitForQueue(DCgState *s, size_t queueIndex);
+
+/** Waits for a fence to singal. */
+void dcgWaitForFence(DCgState *s, DCgFence *fence);
+
+typedef enum DCgShaderStage {
 	DCG_SHADER_STAGE_VERTEX = 0x01,
 	DCG_SHADER_STAGE_GEOMETRY = 0x08,
 	DCG_SHADER_STAGE_FRAGMENT = 0x10,
 	DCG_SHADER_STAGE_COMPUTE = 0x20,
 } DCgShaderStage;
+
+enum DCgPipelineStage {
+	DCG_PIPELINE_STAGE_TOP_OF_PIPE_BIT = 0x00000001,
+	DCG_PIPELINE_STAGE_DRAW_INDIRECT_BIT = 0x00000002,
+	DCG_PIPELINE_STAGE_VERTEX_INPUT_BIT = 0x00000004,
+	DCG_PIPELINE_STAGE_VERTEX_SHADER_BIT = 0x00000008,
+	DCG_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT = 0x00000010,
+	DCG_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT = 0x00000020,
+	DCG_PIPELINE_STAGE_GEOMETRY_SHADER_BIT = 0x00000040,
+	DCG_PIPELINE_STAGE_FRAGMENT_SHADER_BIT = 0x00000080,
+	DCG_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT = 0x00000100,
+	DCG_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT = 0x00000200,
+	DCG_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT = 0x00000400,
+	DCG_PIPELINE_STAGE_COMPUTE_SHADER_BIT = 0x00000800,
+	DCG_PIPELINE_STAGE_TRANSFER_BIT = 0x00001000,
+	DCG_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT = 0x00002000,
+	DCG_PIPELINE_STAGE_HOST_BIT = 0x00004000,
+	DCG_PIPELINE_STAGE_ALL_GRAPHICS_BIT = 0x00008000,
+	DCG_PIPELINE_STAGE_ALL_COMMANDS_BIT = 0x00010000,
+	DCG_PIPELINE_STAGE_NONE = 0,
+};
 
 typedef struct DCgShaderModule {
 	DCgShaderStage stage;
