@@ -61,6 +61,18 @@ DCM__T_FOR(DCM__SVV_F, , Dot, 3, return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 DCM__T_FOR(DCM__VV_F, , Cross, 3, dst[0] = dst[1] * src[2] - dst[2] * src[1]; dst[1] = dst[2] * src[0] - dst[0] * src[2];
            dst[2] = dst[0] * src[1] - dst[1] * src[0];)
 
+DCM__T_FOR(DCM__VV_F, , Subv, 4, DCM__V4_OP_FOR(DCM__VV_OP, ;, -=);)
+DCM__T_FOR(DCM__VV_F, , Addv, 4, DCM__V4_OP_FOR(DCM__VV_OP, ;, +=);)
+DCM__T_FOR(DCM__VV_F, , Mulv, 4, DCM__V4_OP_FOR(DCM__VV_OP, ;, *=);)
+DCM__T_FOR(DCM__VV_F, , Divv, 4, DCM__V4_OP_FOR(DCM__VV_OP, ;, /=);)
+DCM__T_FOR(DCM__VS_F, , Adds, 4, DCM__V4_OP_FOR(DCM__VS_OP, ;, +=);)
+DCM__T_FOR(DCM__VS_F, , Subs, 4, DCM__V4_OP_FOR(DCM__VS_OP, ;, -=);)
+DCM__T_FOR(DCM__VS_F, , Muls, 4, DCM__V4_OP_FOR(DCM__VS_OP, ;, *=);)
+DCM__T_FOR(DCM__VS_F, , Divs, 4, DCM__V4_OP_FOR(DCM__VS_OP, ;, /=);)
+DCM__T_FOR(DCM__SVV_F, , Dot, 4, return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];)
+DCM__T_FOR(DCM__VV_F, , Cross, 4, dst[0] = dst[1] * src[3] - dst[3] * src[1]; dst[1] = dst[2] * src[0] - dst[0] * src[2];
+           dst[2] = dst[3] * src[1] - dst[1] * src[3]; dst[3] = dst[0] * src[2] - dst[2] * src[0];)
+
 /* void test() {
     DCmVector2i16 a = { 12, -48 };
     DCmVector2i16 b = { -93, 11 };
